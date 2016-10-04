@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
+  "modid": "bigagriculture",
+  "name": "Big Agriculture",
+  "description": "A multiblock farming experiment",
+  "version": "0.0.1",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["spaceface"],
+  "credits": "The Forge, MCP, and FML guys, for making it possible",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
