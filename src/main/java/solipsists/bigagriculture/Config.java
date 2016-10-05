@@ -3,6 +3,7 @@ package solipsists.bigagriculture;
 import org.apache.logging.log4j.Level;
 
 import net.minecraftforge.common.config.Configuration;
+import solipsists.bigagriculture.proxy.CommonProxy;
 
 public class Config {
 	private static final String CATEGORY_GENERAL = "general";
@@ -10,7 +11,7 @@ public class Config {
 	public static boolean testValue = true;
 	
 	public static void readConfig() {
-		Configuration cfg = BigAgriculture.config;
+		Configuration cfg = CommonProxy.config;
 		try {
 			cfg.load();
 			initGeneralConfig(cfg);

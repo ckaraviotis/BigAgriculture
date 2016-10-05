@@ -24,6 +24,8 @@ import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.tileentity.TileController;
 
 public class BlockController extends Block implements ITileEntityProvider {
+	
+	public static final int GUI_ID = 1;
 
 	public BlockController() {
 		super(Material.ROCK);
@@ -40,8 +42,17 @@ public class BlockController extends Block implements ITileEntityProvider {
 	
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-		TileController t = this.getTE(worldIn, pos);
-		boolean b = t.changeItem(heldItem, playerIn);
+		// Bail on server
+		if (worldIn.isRemote) {
+			return true;
+		}
+		
+		TileEntity t = worldIn.getTileEntity(pos);
+		if (!(t instanceof TileController))
+			return false;
+		
+		//boolean b = t.changeItem(heldItem, playerIn);
+		playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		return true;
 	}
 		

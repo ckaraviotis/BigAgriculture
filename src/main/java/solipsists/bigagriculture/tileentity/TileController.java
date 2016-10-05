@@ -3,8 +3,6 @@ package solipsists.bigagriculture.tileentity;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.logging.log4j.Level;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.BlockGrass;
@@ -16,11 +14,16 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.IPlantable;
-import solipsists.bigagriculture.BigAgriculture;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
+import scala.collection.generic.GenericClassTagCompanion;
 
 public class TileController extends TileEntity implements ITickable {
 	
@@ -29,6 +32,8 @@ public class TileController extends TileEntity implements ITickable {
 	private int radius = 1;
 	public int tick = 0;
 	private Random rand = new Random();
+	
+	public static final int SLOTS = 1;
 	
 	public boolean hasIrrigator = true;
 	public boolean hasFertilizer = true;
@@ -45,7 +50,51 @@ public class TileController extends TileEntity implements ITickable {
 		}		
 		return false;
 	}
-
+	
+	// Inventory slots
+	private ItemStackHandler itemStackHandler = new ItemStackHandler(SLOTS) {
+		@Override
+		protected void onContentsChanged(int slot) {
+			TileController.this.markDirty();
+		}
+	};
+	
+    public boolean canInteractWith(EntityPlayer playerIn) {
+        // If we are too far away from this tile entity you cannot use it
+        return !isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
+    }
+	
+	@Override
+	public void readFromNBT(NBTTagCompound compound) {
+		super.readFromNBT(compound);
+		if (compound.hasKey("items")) {
+			itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("items"));
+		}
+	}
+	
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+		super.writeToNBT(compound);
+		compound.setTag("items",  itemStackHandler.serializeNBT());
+		return compound;
+	}
+	
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			return true;
+		
+		return super.hasCapability(capability, facing);
+	}
+	
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			return (T) itemStackHandler;
+		
+		return super.getCapability(capability, facing);
+	}
+	
 	@Override
 	public void update() {
 		if(!this.worldObj.isRemote) {
