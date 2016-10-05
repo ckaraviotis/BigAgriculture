@@ -23,6 +23,8 @@ import net.minecraftforge.common.IPlantable;
 import solipsists.bigagriculture.BigAgriculture;
 
 public class TileController extends TileEntity implements ITickable {
+	
+	// Crash when placing on top of a Generator
 
 	private int radius = 1;
 	public int tick = 0;
@@ -50,7 +52,7 @@ public class TileController extends TileEntity implements ITickable {
 			tick++;
 
 			BlockPos me = this.getPos();
-			BigAgriculture.logger.log(Level.INFO, "Coords: " + me.getX() + ", " + me.getY() + ", " + me.getZ());
+			//BigAgriculture.logger.log(Level.INFO, "Coords: " + me.getX() + ", " + me.getY() + ", " + me.getZ());
 			if (tick > 20){
 				tick = 0;
 
@@ -100,22 +102,25 @@ public class TileController extends TileEntity implements ITickable {
 							IBlockState cropState = this.worldObj.getBlockState(plantPos);
 							Block cropBlock = cropState.getBlock();
 							
-							if (!((IGrowable)cropBlock).canGrow(worldObj, plantPos, cropState, true)) {
-								List<ItemStack> drops = cropBlock.getDrops(worldObj, plantPos, cropState, 0);
-								worldObj.removeTileEntity(plantPos);
-								worldObj.setBlockToAir(plantPos);
-								
-								if(drops != null) {
-									for(ItemStack drop : drops) {
-										EntityItem e = new EntityItem(worldObj, plantPos.getX(), plantPos.getY(), plantPos.getZ(), drop);
-										float f3 = 0.05F;
-										e.motionX = (double)((float)worldObj.rand.nextGaussian() * f3);
-										e.motionY = (double)((float)worldObj.rand.nextGaussian() * f3 + 0.2F);
-										e.motionZ = (double)((float)worldObj.rand.nextGaussian() * f3);
-										worldObj.spawnEntityInWorld(e);
+							if (cropBlock instanceof IGrowable) {
+								if (!((IGrowable)cropBlock).canGrow(worldObj, plantPos, cropState, true)) {
+									List<ItemStack> drops = cropBlock.getDrops(worldObj, plantPos, cropState, 0);
+									worldObj.removeTileEntity(plantPos);
+									worldObj.setBlockToAir(plantPos);
+									
+									if(drops != null) {
+										for(ItemStack drop : drops) {
+											EntityItem e = new EntityItem(worldObj, plantPos.getX(), plantPos.getY(), plantPos.getZ(), drop);
+											float f3 = 0.05F;
+											e.motionX = (double)((float)worldObj.rand.nextGaussian() * f3);
+											e.motionY = (double)((float)worldObj.rand.nextGaussian() * f3 + 0.2F);
+											e.motionZ = (double)((float)worldObj.rand.nextGaussian() * f3);
+											worldObj.spawnEntityInWorld(e);
+										}
 									}
 								}
 							}
+
 
 						}
 						
