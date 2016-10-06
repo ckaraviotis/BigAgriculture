@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "up": "bigagriculture:blocks/default",
+    "down": "bigagriculture:blocks/default",
+    "north": "bigagriculture:blocks/fertilizer",
+    "south": "bigagriculture:blocks/fertilizer",
+    "east": "bigagriculture:blocks/fertilizer",
+    "west": "bigagriculture:blocks/fertilizer",
+    "particle": "bigagriculture:blocks/fertilizer"
+  }
+}

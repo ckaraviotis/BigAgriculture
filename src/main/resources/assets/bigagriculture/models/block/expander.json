@@ -1,6 +1,12 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "bigagriculture:blocks/expander"
+    "up": "bigagriculture:blocks/default",
+    "down": "bigagriculture:blocks/default",
+    "north": "bigagriculture:blocks/expander",
+    "south": "bigagriculture:blocks/expander",
+    "east": "bigagriculture:blocks/expander",
+    "west": "bigagriculture:blocks/expander",
+    "particle": "bigagriculture:blocks/expander"
   }
 }

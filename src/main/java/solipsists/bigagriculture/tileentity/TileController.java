@@ -32,6 +32,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.block.BlockController;
 import solipsists.bigagriculture.block.BlockExpander;
+import solipsists.bigagriculture.block.BlockFertilizer;
 import solipsists.bigagriculture.block.BlockMultiblock;
 
 public class TileController extends TileMultiblock implements ITickable {
@@ -47,6 +48,7 @@ public class TileController extends TileMultiblock implements ITickable {
 	
 	public boolean hasIrrigator = true;
 	public boolean hasFertilizer = false;
+	private int fertilizerChance = 0;
 	public boolean hasUnderground = false; // Build multiblock beneath the crops?
 	
 	// Multiblock vars
@@ -186,6 +188,23 @@ public class TileController extends TileMultiblock implements ITickable {
 		return rad;
 	}
 	
+	private int getFertilizerChance() {
+		int chance = 0;
+		for (BlockPos e : multiblock) {
+			Block b = this.worldObj.getBlockState(e).getBlock();
+			
+			if (b instanceof BlockFertilizer) {
+				TileFertilizer t = (TileFertilizer)worldObj.getTileEntity(e);
+				chance += t.CHANCE;
+			}
+		}
+		
+		if (chance > 100)
+			chance = 100;
+		
+		return chance;
+	}
+	
 	private ItemStack decrementStack(ItemStack itemStack, int amount) {
 		if (itemStack.stackSize <= amount) {
 			return null;			
@@ -206,6 +225,8 @@ public class TileController extends TileMultiblock implements ITickable {
 				// Check we have a valid MB, and set the controller active as required
 				isActive = isMultiblockValid(this.getPos());
 				clearRemovedMBBlocks();
+				fertilizerChance = getFertilizerChance();
+				hasFertilizer = fertilizerChance > 0;
 			}
 
 			
@@ -214,7 +235,7 @@ public class TileController extends TileMultiblock implements ITickable {
 
 				// Add up multiblock mods.
 				this.radius = getMultiblockRadius(BASE_RADIUS);
-				
+								
 				for (int i = -radius; i <= radius; i++) {
 					for (int j = -radius; j <= radius; j++) {
 						if (i != 0 || j != 0) {
@@ -254,7 +275,7 @@ public class TileController extends TileMultiblock implements ITickable {
 					
 							
 							// Tick the crops
-							if (hasFertilizer) {
+							if (hasFertilizer && rand.nextInt(100) <= fertilizerChance) {
 								if (!this.worldObj.isAirBlock(plantPos)) {
 									IBlockState plantState = this.worldObj.getBlockState(plantPos);
 									Block plant = plantState.getBlock();
