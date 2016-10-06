@@ -1,10 +1,10 @@
 package solipsists.bigagriculture.block;
 
 /***
- * Waters crops
+ * Provides infinite plantable to slot0
  * @author spaceface
  *
  */
-public class BlockIrrigator {
+public class BlockInfinityStone {
 
 }

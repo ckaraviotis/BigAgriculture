@@ -2,10 +2,13 @@ package solipsists.bigagriculture.block;
 
 import org.apache.logging.log4j.Level;
 
-import net.minecraft.block.Block;
+import com.mojang.authlib.properties.Property;
+
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -20,6 +23,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -59,7 +63,13 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 			return false;
 		
 		TileController tc = (TileController) t;
-		BigAgriculture.logger.log(Level.INFO, "Controller status: " + tc.isActive);
+
+		String active = tc.isActive ? "ACTIVE" : "INACTIVE" ;
+		String invStatus = tc.inventoryHasRoom ? "NOT FULL" : "FULL";
+		
+		playerIn.addChatComponentMessage(new TextComponentString("Controller is " + active));
+		playerIn.addChatComponentMessage(new TextComponentString("Controller inventory status " + invStatus));
+		
 		playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		return true;
 	}
@@ -68,6 +78,14 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         //world.setBlockState(pos, state.withProperty(FACING, placer.getHorizontalFacing().getOpposite()), 2);
         world.setBlockState(pos, state.withProperty(FACING, getFacingFromEntity(pos, placer)), 2);
+        
+        TileEntity t = world.getTileEntity(pos);
+    	if ((t instanceof TileController)) {
+    		TileController tc = (TileController) t;	
+    		
+    		tc.setOwner((EntityPlayer)placer);
+    	}				
+        
 	}
    
    @Override
