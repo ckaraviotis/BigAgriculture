@@ -25,7 +25,21 @@ public class TestContainer extends Container {
 	
 	private void addOwnSlots() {
 		IItemHandler itemHandler = this.te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-		addSlotToContainer(new SlotItemHandler(itemHandler, 0, 9, 6));
+		
+		// Input slot
+		addSlotToContainer(new SlotItemHandler(itemHandler, 0, 82, 29));
+		
+		int x = 117;
+		int y = 11;
+		
+		for (int i = 1; i < itemHandler.getSlots(); i++) {
+			if (x > 153) {
+				x = 117;
+				y += 18;
+			}
+			addSlotToContainer(new SlotItemHandler(itemHandler, i, x, y));	
+			x += 18;
+		}
 	}
 	
     private void addPlayerSlots(IInventory playerInventory) {

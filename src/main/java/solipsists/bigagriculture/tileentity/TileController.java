@@ -43,10 +43,10 @@ public class TileController extends TileMultiblock implements ITickable {
 	public int tick = 0;
 	private Random rand = new Random();
 	
-	public static final int SLOTS = 1;
+	public static final int SLOTS = 10;
 	
 	public boolean hasIrrigator = true;
-	public boolean hasFertilizer = true;
+	public boolean hasFertilizer = false;
 	public boolean hasUnderground = false; // Build multiblock beneath the crops?
 	
 	// Multiblock vars
@@ -186,6 +186,15 @@ public class TileController extends TileMultiblock implements ITickable {
 		return rad;
 	}
 	
+	private ItemStack decrementStack(ItemStack itemStack, int amount) {
+		if (itemStack.stackSize <= amount) {
+			return null;			
+		}
+		
+		ItemStack split = itemStack.splitStack(amount);
+		return split;
+	}
+	
 	@Override
 	public void update() {
 		if(!this.worldObj.isRemote) {
@@ -229,21 +238,33 @@ public class TileController extends TileMultiblock implements ITickable {
 							
 							// Plant seeds!
 							if (isFarmland && this.worldObj.isAirBlock(plantPos)) {
-								IBlockState p = ((IPlantable)itemStack.getItem()).getPlant(worldObj, plantPos);
-								worldObj.setBlockState(plantPos, p, 7);
+								ItemStack inputStack = itemStackHandler.getStackInSlot(0);
+								
+								if (inputStack != null && inputStack.getItem() instanceof IPlantable) {								
+									IPlantable crop = (IPlantable) itemStackHandler.getStackInSlot(0).getItem();
+									IBlockState cropState = crop.getPlant(worldObj, plantPos);
+									
+									inputStack = decrementStack(inputStack, 1);
+									
+									if (inputStack != null)
+										worldObj.setBlockState(plantPos, cropState, 7);
+								}
+								 
 							}
 					
 							
 							// Tick the crops
-							if (!this.worldObj.isAirBlock(plantPos)) {
-								IBlockState plantState = this.worldObj.getBlockState(plantPos);
-								Block plant = plantState.getBlock();
-								
-								if ((plant instanceof IGrowable || plant instanceof IPlantable) && !(plant instanceof BlockGrass)) {
-									plant.updateTick(this.worldObj, plantPos, plantState, rand);
-									IBlockState newState = this.worldObj.getBlockState(plantPos);
-									if (newState.getBlock().getMetaFromState(newState) != plant.getMetaFromState(plantState)) {
-										this.worldObj.playEvent(2005,  plantPos,  0);
+							if (hasFertilizer) {
+								if (!this.worldObj.isAirBlock(plantPos)) {
+									IBlockState plantState = this.worldObj.getBlockState(plantPos);
+									Block plant = plantState.getBlock();
+									
+									if ((plant instanceof IGrowable || plant instanceof IPlantable) && !(plant instanceof BlockGrass)) {
+										plant.updateTick(this.worldObj, plantPos, plantState, rand);
+										IBlockState newState = this.worldObj.getBlockState(plantPos);
+										if (newState.getBlock().getMetaFromState(newState) != plant.getMetaFromState(plantState)) {
+											this.worldObj.playEvent(2005,  plantPos,  0);
+										}
 									}
 								}
 							}
