@@ -19,7 +19,7 @@ import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.tileentity.TileController;
 import solipsists.bigagriculture.tileentity.TileExpander;
 
-public class BlockExpander extends Block implements ITileEntityProvider {
+public class BlockExpander extends BlockMultiblock implements ITileEntityProvider {
 
 	public BlockExpander() {
 		super(Material.ROCK);

@@ -3,10 +3,9 @@ package solipsists.bigagriculture.tileentity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
-public class TileExpander extends TileEntity {
+public class TileExpander extends TileMultiblock {
 
 	public static int RADIUS = 1;
-	public static boolean CHECKED = false;
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {

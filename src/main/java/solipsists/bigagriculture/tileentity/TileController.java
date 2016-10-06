@@ -32,8 +32,9 @@ import net.minecraftforge.items.ItemStackHandler;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.block.BlockController;
 import solipsists.bigagriculture.block.BlockExpander;
+import solipsists.bigagriculture.block.BlockMultiblock;
 
-public class TileController extends TileEntity implements ITickable {
+public class TileController extends TileMultiblock implements ITickable {
 	
 	// Crash when placing on top of a Generator
 
@@ -121,7 +122,6 @@ public class TileController extends TileEntity implements ITickable {
 		
 		// TODO This implementation sucks.
 		neighbours.add( pos.up() );
-		//neighbours.add( pos.down() );
 		neighbours.add( pos.north() );
 		neighbours.add( pos.south() );
 		neighbours.add( pos.east() );
@@ -133,7 +133,7 @@ public class TileController extends TileEntity implements ITickable {
 			
 			if (!mbChecked.contains(neighbour)) {
 				mbChecked.add(neighbour);
-				boolean isValidBlock = b instanceof BlockController || b instanceof BlockExpander;
+				boolean isValidBlock = b instanceof BlockMultiblock;
 				boolean isAir = this.worldObj.isAirBlock(neighbour);
 				boolean isCrop = b instanceof IGrowable;				
 				
@@ -145,13 +145,8 @@ public class TileController extends TileEntity implements ITickable {
 				if (isValidBlock) {
 					// Add to multiblock set
 					multiblock.add(neighbour);
-					
-					// Add to separate set of expanders
-					if (b instanceof BlockExpander) {
-						TileExpander t = (TileExpander) this.worldObj.getTileEntity(neighbour);
-						t.CHECKED = true;
-						expanders.add(neighbour);
-					}
+					TileMultiblock t = (TileMultiblock)this.worldObj.getTileEntity(neighbour);
+					t.CHECKED = true;
 					
 					if (!isMultiblockValid(neighbour))
 						return false;
@@ -162,17 +157,17 @@ public class TileController extends TileEntity implements ITickable {
 		return true;
 	}
 	
-	private void clearRemovedExpanders() {
+	private void clearRemovedMBBlocks() {
 		// Purge removed expanders
-		for (Iterator<BlockPos> i = expanders.iterator(); i.hasNext();) {
+		for (Iterator<BlockPos> i = multiblock.iterator(); i.hasNext();) {
 			try {
 				BlockPos bp = i.next();
 				Block b = this.worldObj.getBlockState(bp).getBlock();
-				if (!(b instanceof BlockExpander)) {
+				if (!(b instanceof BlockMultiblock)) {
 					i.remove();
 			}
 			} catch (Exception e) {
-				BigAgriculture.logger.log(Level.ERROR, "Something went wrong removing an expander!", e);
+				BigAgriculture.logger.log(Level.ERROR, "Something went wrong removing a multiblock block!", e);
 			}
 		}
 
@@ -180,9 +175,13 @@ public class TileController extends TileEntity implements ITickable {
 	
 	private int getMultiblockRadius(int base) {
 		int rad = BASE_RADIUS;
-		for (BlockPos e : expanders) {
-			TileExpander t = (TileExpander)worldObj.getTileEntity(e);
-			rad += t.RADIUS;
+		for (BlockPos e : multiblock) {
+			Block b = this.worldObj.getBlockState(e).getBlock();
+			
+			if (b instanceof BlockExpander) {
+				TileExpander t = (TileExpander)worldObj.getTileEntity(e);
+				rad += t.RADIUS;
+			}				
 		}
 		return rad;
 	}
@@ -197,7 +196,7 @@ public class TileController extends TileEntity implements ITickable {
 				multiBlockRefresh = 100;
 				// Check we have a valid MB, and set the controller active as required
 				isActive = isMultiblockValid(this.getPos());
-				clearRemovedExpanders();
+				clearRemovedMBBlocks();
 			}
 
 			

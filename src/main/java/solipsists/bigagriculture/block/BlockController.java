@@ -25,7 +25,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.tileentity.TileController;
 
-public class BlockController extends Block implements ITileEntityProvider {
+public class BlockController extends BlockMultiblock implements ITileEntityProvider {
 	
 	public static final int GUI_ID = 1;
 
