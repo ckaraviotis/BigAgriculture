@@ -1,5 +1,7 @@
 package solipsists.bigagriculture.block;
 
+import org.apache.logging.log4j.Level;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -51,10 +53,13 @@ public class BlockController extends Block implements ITileEntityProvider {
 		if (!(t instanceof TileController))
 			return false;
 		
-		//boolean b = t.changeItem(heldItem, playerIn);
+		TileController tc = (TileController) t;
+		BigAgriculture.logger.log(Level.INFO, "Controller status: " + tc.isActive);
 		playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		return true;
 	}
+	
+	
 		
 	@SideOnly(Side.CLIENT)
 	public void initModel() {

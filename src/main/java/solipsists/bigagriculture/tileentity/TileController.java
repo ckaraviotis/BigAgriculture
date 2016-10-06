@@ -1,7 +1,13 @@
 package solipsists.bigagriculture.tileentity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+
+import org.apache.logging.log4j.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFarmland;
@@ -23,13 +29,16 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import scala.collection.generic.GenericClassTagCompanion;
+import solipsists.bigagriculture.BigAgriculture;
+import solipsists.bigagriculture.block.BlockController;
+import solipsists.bigagriculture.block.BlockExpander;
 
 public class TileController extends TileEntity implements ITickable {
 	
 	// Crash when placing on top of a Generator
 
-	private int radius = 1;
+	private static final int BASE_RADIUS = 1;
+	private int radius = BASE_RADIUS;
 	public int tick = 0;
 	private Random rand = new Random();
 	
@@ -38,6 +47,13 @@ public class TileController extends TileEntity implements ITickable {
 	public boolean hasIrrigator = true;
 	public boolean hasFertilizer = true;
 	public boolean hasUnderground = false; // Build multiblock beneath the crops?
+	
+	// Multiblock vars
+	public int multiBlockRefresh = 100;
+	public boolean isActive = false;	// is multiblock complete?
+	protected Set<BlockPos> expanders = new HashSet<BlockPos>();
+	protected Set<BlockPos> multiblock = new HashSet<BlockPos>();
+	protected Set<BlockPos> mbChecked = new HashSet<BlockPos>();
 	
 	private ItemStack itemStack = new ItemStack(Items.WHEAT_SEEDS, 1);
 	
@@ -95,16 +111,102 @@ public class TileController extends TileEntity implements ITickable {
 		return super.getCapability(capability, facing);
 	}
 	
+	/***
+	 * Validate the multiblock structure
+	 * @param pos
+	 * @return
+	 */
+	private boolean isMultiblockValid(BlockPos pos) {
+		List<BlockPos> neighbours = new ArrayList<BlockPos>(); 
+		
+		// TODO This implementation sucks.
+		neighbours.add( pos.up() );
+		//neighbours.add( pos.down() );
+		neighbours.add( pos.north() );
+		neighbours.add( pos.south() );
+		neighbours.add( pos.east() );
+		neighbours.add( pos.west() );
+		
+		for(BlockPos neighbour : neighbours) {			
+			Block b = this.worldObj.getBlockState(neighbour).getBlock();
+			
+			
+			if (!mbChecked.contains(neighbour)) {
+				mbChecked.add(neighbour);
+				boolean isValidBlock = b instanceof BlockController || b instanceof BlockExpander;
+				boolean isAir = this.worldObj.isAirBlock(neighbour);
+				boolean isCrop = b instanceof IGrowable;				
+				
+				if(!isValidBlock && !isAir && !isCrop) {
+					BigAgriculture.logger.log(Level.INFO, "Invalid block "+ b.getUnlocalizedName() + " at location: " + neighbour.getX() + ", " + neighbour.getY() + ", " + neighbour.getZ());
+					return false;
+				}
+					
+				if (isValidBlock) {
+					// Add to multiblock set
+					multiblock.add(neighbour);
+					
+					// Add to separate set of expanders
+					if (b instanceof BlockExpander) {
+						TileExpander t = (TileExpander) this.worldObj.getTileEntity(neighbour);
+						t.CHECKED = true;
+						expanders.add(neighbour);
+					}
+					
+					if (!isMultiblockValid(neighbour))
+						return false;
+				}
+			}
+		}		
+		
+		return true;
+	}
+	
+	private void clearRemovedExpanders() {
+		// Purge removed expanders
+		for (Iterator<BlockPos> i = expanders.iterator(); i.hasNext();) {
+			try {
+				BlockPos bp = i.next();
+				Block b = this.worldObj.getBlockState(bp).getBlock();
+				if (!(b instanceof BlockExpander)) {
+					i.remove();
+			}
+			} catch (Exception e) {
+				BigAgriculture.logger.log(Level.ERROR, "Something went wrong removing an expander!", e);
+			}
+		}
+
+	}
+	
+	private int getMultiblockRadius(int base) {
+		int rad = BASE_RADIUS;
+		for (BlockPos e : expanders) {
+			TileExpander t = (TileExpander)worldObj.getTileEntity(e);
+			rad += t.RADIUS;
+		}
+		return rad;
+	}
+	
 	@Override
 	public void update() {
 		if(!this.worldObj.isRemote) {
 			tick++;
+			multiBlockRefresh--;
+			
+			if (multiBlockRefresh <= 0) {
+				multiBlockRefresh = 100;
+				// Check we have a valid MB, and set the controller active as required
+				isActive = isMultiblockValid(this.getPos());
+				clearRemovedExpanders();
+			}
 
-			BlockPos me = this.getPos();
-			//BigAgriculture.logger.log(Level.INFO, "Coords: " + me.getX() + ", " + me.getY() + ", " + me.getZ());
-			if (tick > 20){
+			
+			if (tick > 20 && isActive){
 				tick = 0;
 
+				// Add up multiblock mods.
+				this.radius = getMultiblockRadius(BASE_RADIUS);
+				
 				for (int i = -radius; i <= radius; i++) {
 					for (int j = -radius; j <= radius; j++) {
 						if (i != 0 || j != 0) {
