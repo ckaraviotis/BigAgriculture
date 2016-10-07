@@ -33,6 +33,7 @@ import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.block.BlockExpander;
 import solipsists.bigagriculture.block.BlockFertilizer;
 import solipsists.bigagriculture.block.BlockMultiblock;
+import solipsists.bigagriculture.multiblock.Multiblock;
 
 public class TileController extends TileMultiblock implements ITickable {
 
@@ -55,13 +56,9 @@ public class TileController extends TileMultiblock implements ITickable {
 	private EntityPlayer owner;
 
 	// Multiblock vars
-	public int multiBlockRefresh = 100;
+	public int multiBlockRefresh = 1000;
 	public boolean isActive = false;	// is multiblock complete?
-	private Set<BlockPos> expanders = new HashSet<BlockPos>();
-	private Set<BlockPos> multiblock = new HashSet<BlockPos>();
-	private Set<BlockPos> mbChecked = new HashSet<BlockPos>();
-
-	private HashMap<BlockPos, Boolean> tMultiBlock = new HashMap();
+	private Multiblock multiblock = new Multiblock();
 
 	public void setOwner(EntityPlayer p) {
 		this.owner = p;
@@ -116,71 +113,7 @@ public class TileController extends TileMultiblock implements ITickable {
 		return super.getCapability(capability, facing);
 	}
 
-	private boolean validateMultiblock() {
-		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
-			if (pair.getValue() == Boolean.FALSE)
-				return false;
-		}
-		return true;
-	}
-
-	private void buildMultiblock(BlockPos current) {
-		List<BlockPos> neighbours = new ArrayList<BlockPos>(); 
-
-		// TODO This implementation sucks.
-		neighbours.add( current.up() );
-		neighbours.add( current.north() );
-		neighbours.add( current.south() );
-		neighbours.add( current.east() );
-		neighbours.add( current.west() );
-
-		for(BlockPos neighbour : neighbours) {			
-			Block b = this.worldObj.getBlockState(neighbour).getBlock();			
-
-			if (!mbChecked.contains(neighbour)) {
-				mbChecked.add(neighbour);
-				boolean isValidBlock = b instanceof BlockMultiblock;
-				boolean isAir = this.worldObj.isAirBlock(neighbour);
-				boolean isCrop = b instanceof BlockCrops;
-
-				if(!isValidBlock && !isAir && !isCrop) {
-					BigAgriculture.logger.log(Level.INFO, "Invalid block "+ b.getUnlocalizedName() + " at location: " + neighbour.getX() + ", " + neighbour.getY() + ", " + neighbour.getZ());
-					try {
-						Boolean oldValue = tMultiBlock.put(neighbour, Boolean.FALSE);
-						if (oldValue == null) {
-							BigAgriculture.logger.log(Level.INFO, "Added new INVALID entry " + b.getUnlocalizedName() +  " to mb structure");
-						} else {
-							BigAgriculture.logger.log(Level.INFO, "Replaced block " + b.getUnlocalizedName() +  " with INVALID entry.");
-						}
-
-					} catch (Exception ex) {
-						BigAgriculture.logger.log(Level.ERROR, "Ruh-roh", ex);
-					}
-				}
-
-				if (isValidBlock) {
-					try {
-						Boolean oldValue = tMultiBlock.put(neighbour, Boolean.TRUE);
-						if (oldValue == null) {
-							BigAgriculture.logger.log(Level.INFO, "Added new VALID entry " + b.getUnlocalizedName() +  " to mb structure");
-						} else {
-							BigAgriculture.logger.log(Level.INFO, "Replaced block " + b.getUnlocalizedName() +  " with VALID entry.");
-						}
-
-					} catch (Exception ex) {
-						BigAgriculture.logger.log(Level.ERROR, "Ruh-roh", ex);
-					}
-
-					TileMultiblock t = (TileMultiblock)this.worldObj.getTileEntity(neighbour);
-					t.CHECKED = true;
-
-					buildMultiblock(neighbour);
-				}
-			}
-		}		
-	}
-
-	private void printMB() {
+	/*private void printMB() {
 		BigAgriculture.logger.log(Level.INFO, "Multiblock contains the following:");
 		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
 			int x = pair.getKey().getX();
@@ -189,39 +122,11 @@ public class TileController extends TileMultiblock implements ITickable {
 			Boolean valid = pair.getValue();			
 			BigAgriculture.logger.log(Level.INFO, "Coords [" + x + "," + y + "," + z + "] in set. Valid=" + valid);
 		}
-	}
-
-	private void clearRemovedMBBlocks() {
-		// Purge removed expanders
-		for (Iterator<BlockPos> i = multiblock.iterator(); i.hasNext();) {
-			try {
-				BlockPos bp = i.next();
-				Block b = this.worldObj.getBlockState(bp).getBlock();
-				if (!(b instanceof BlockMultiblock)) {
-					i.remove();
-				}
-			} catch (Exception e) {
-				BigAgriculture.logger.log(Level.ERROR, "Something went wrong removing a multiblock block!", e);
-			}
-		}
-
-	}
-
-	private int getMultiblockRadius(int base) {
-		int rad = BASE_RADIUS;
-		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
-			Block b = this.worldObj.getBlockState(pair.getKey()).getBlock();
-
-			if (b instanceof BlockExpander) {
-				TileExpander t = (TileExpander)worldObj.getTileEntity(pair.getKey());
-				rad += t.RADIUS;
-			}	
-		}
-		return rad;
-	}
+	}*/
 
 	private int getFertilizerChance() {
 		int chance = 0;
+		/*
 		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
 			Block b = this.worldObj.getBlockState(pair.getKey()).getBlock();
 
@@ -233,7 +138,7 @@ public class TileController extends TileMultiblock implements ITickable {
 
 		if (chance > 100)
 			chance = 100;
-
+	 	*/
 		return chance;
 	}
 
@@ -310,38 +215,32 @@ public class TileController extends TileMultiblock implements ITickable {
 	@Override
 	public void update() {
 		if(!this.worldObj.isRemote) {
-			//tick++;
-			multiBlockRefresh--;
+			multiBlockRefresh++;
 
-			if (multiBlockRefresh <= 0) {
-				multiBlockRefresh = 100;
+			if (multiBlockRefresh >= 100) {
+				multiBlockRefresh = 0;
 				// Check we have a valid MB, and set the controller active as required
-				// TODO: Re-check inventory when items are removed
-				tMultiBlock.clear();
-				mbChecked.clear();
-				buildMultiblock(pos);
-				//boolean mbChecked = isMultiblockValid(this.getPos());
-				boolean validMB = validateMultiblock();
+				// TODO: Re-check inventory when items are removed				
+				multiblock.buildMultiblock(worldObj, pos, true);
+				boolean multiblockValid = multiblock.isValid();
+
 				//printMB();
 
-				if (!validMB && owner != null)
+				if (!multiblockValid && owner != null)
 					owner.addChatComponentMessage(new TextComponentString("Multiblock structure is invalid."));
 
-				isActive = validMB;// && inventoryHasRoom;
-				clearRemovedMBBlocks();
+				isActive = multiblockValid;// && inventoryHasRoom;
+				//clearRemovedMBBlocks();
 				fertilizerChance = getFertilizerChance();
 				hasFertilizer = fertilizerChance > 0;
 			}
 
-
-			//if (tick > 20 && isActive){
-			//tick = 0;
 			boolean cropActionTaken = false;	
 			boolean fertActionTaken = false;
 
 			// TODO Radius should start from MB boundary, not controller 
 			// Add up radius mods.
-			this.radius = getMultiblockRadius(BASE_RADIUS);
+			this.radius = multiblock.getMultiblockRadius(worldObj, BASE_RADIUS);
 
 			for (int i = -radius; i <= radius; i++) {
 				for (int j = -radius; j <= radius; j++) {
