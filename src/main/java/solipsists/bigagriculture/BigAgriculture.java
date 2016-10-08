@@ -2,13 +2,13 @@ package solipsists.bigagriculture;
 
 import org.apache.logging.log4j.Logger;
 
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.proxy.CommonProxy;
 
 @Mod(modid = BigAgriculture.MODID, name = BigAgriculture.MODNAME, version = BigAgriculture.MODVERSION)

@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import solipsists.bigagriculture.BigAgriculture;
@@ -56,7 +57,7 @@ public class Multiblock {
 
 			if (!structure.contains(neighbour)) {
 				structure.add(neighbour);
-				BigAgriculture.logger.log(Level.INFO, "Added block "+ b.getUnlocalizedName() + " at location: " + neighbour.getX() + ", " + neighbour.getY() + ", " + neighbour.getZ());
+				//BigAgriculture.logger.log(Level.INFO, "Added block "+ b.getUnlocalizedName() + " at location: " + neighbour.getX() + ", " + neighbour.getY() + ", " + neighbour.getZ());
 				
 				boolean isValidBlock = b instanceof BlockMultiblock;
 				boolean isAir = world.isAirBlock(neighbour);
@@ -70,7 +71,7 @@ public class Multiblock {
 
 				if (isValidBlock) {
 					structure.setValid(neighbour, true);
-					BigAgriculture.logger.log(Level.INFO, "Block "+ b.getUnlocalizedName() + " marked as valid.");
+					//BigAgriculture.logger.log(Level.INFO, "Block "+ b.getUnlocalizedName() + " marked as valid.");
 					
 					TileMultiblock t = (TileMultiblock)world.getTileEntity(neighbour);
 					t.CHECKED = true;
@@ -86,6 +87,10 @@ public class Multiblock {
 	
 	public int getMultiblockRadius(World world, int radius) {
 		return structure.getMultiblockRadius(world, radius);
+	}
+	
+	public void render(World world) {
+		this.structure.render(world);
 	}
 	
 }

@@ -1,12 +1,7 @@
 package solipsists.bigagriculture.tileentity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import org.apache.logging.log4j.Level;
 
@@ -15,6 +10,7 @@ import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.BlockGrass;
+import net.minecraft.block.BlockGrassPath;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,9 +26,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import solipsists.bigagriculture.BigAgriculture;
-import solipsists.bigagriculture.block.BlockExpander;
-import solipsists.bigagriculture.block.BlockFertilizer;
-import solipsists.bigagriculture.block.BlockMultiblock;
 import solipsists.bigagriculture.multiblock.Multiblock;
 
 public class TileController extends TileMultiblock implements ITickable {
@@ -41,7 +34,8 @@ public class TileController extends TileMultiblock implements ITickable {
 
 	private static final int BASE_RADIUS = 1;
 	private int radius = BASE_RADIUS;
-	public int tick = 0;
+	public int tickCounter = 0;
+	private int operationInterval = 10;
 	private Random rand = new Random();
 
 	public static final int SLOTS = 10;
@@ -113,19 +107,8 @@ public class TileController extends TileMultiblock implements ITickable {
 		return super.getCapability(capability, facing);
 	}
 
-	/*private void printMB() {
-		BigAgriculture.logger.log(Level.INFO, "Multiblock contains the following:");
-		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
-			int x = pair.getKey().getX();
-			int y = pair.getKey().getY();
-			int z = pair.getKey().getZ();
-			Boolean valid = pair.getValue();			
-			BigAgriculture.logger.log(Level.INFO, "Coords [" + x + "," + y + "," + z + "] in set. Valid=" + valid);
-		}
-	}*/
-
 	private int getFertilizerChance() {
-		int chance = 0;
+		int chance = 50;
 		/*
 		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
 			Block b = this.worldObj.getBlockState(pair.getKey()).getBlock();
@@ -138,7 +121,7 @@ public class TileController extends TileMultiblock implements ITickable {
 
 		if (chance > 100)
 			chance = 100;
-	 	*/
+		 */
 		return chance;
 	}
 
@@ -211,10 +194,15 @@ public class TileController extends TileMultiblock implements ITickable {
 		}
 		return true;
 	}
+	
+	public void render() {
+		multiblock.render(worldObj);
+	}
 
 	@Override
 	public void update() {
 		if(!this.worldObj.isRemote) {
+			tickCounter++;
 			multiBlockRefresh++;
 
 			if (multiBlockRefresh >= 100) {
@@ -223,112 +211,120 @@ public class TileController extends TileMultiblock implements ITickable {
 				// TODO: Re-check inventory when items are removed				
 				multiblock.buildMultiblock(worldObj, pos, true);
 				boolean multiblockValid = multiblock.isValid();
-
-				//printMB();
-
+				
 				if (!multiblockValid && owner != null)
 					owner.addChatComponentMessage(new TextComponentString("Multiblock structure is invalid."));
 
 				isActive = multiblockValid;// && inventoryHasRoom;
-				//clearRemovedMBBlocks();
 				fertilizerChance = getFertilizerChance();
 				hasFertilizer = fertilizerChance > 0;
 			}
 
-			boolean cropActionTaken = false;	
-			boolean fertActionTaken = false;
+			boolean plantAction = false;
+			boolean harvestAction = false;	
 
 			// TODO Radius should start from MB boundary, not controller 
 			// Add up radius mods.
 			this.radius = multiblock.getMultiblockRadius(worldObj, BASE_RADIUS);
 
-			for (int i = -radius; i <= radius; i++) {
-				for (int j = -radius; j <= radius; j++) {
+			// TODO Add "operating block" to Multiblock to track where we are performing operations
 
-					if (i != 0 || j != 0) {
-						BlockPos earthPos = this.getPos().add(i,-1,j);	
-						IBlockState earthState = worldObj.getBlockState(earthPos);
-						Block earth = earthState.getBlock();
-						BlockPos plantPos = earthPos.up();		
+			// TODO Change for loop to match BlockFarmland example below
+			// for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(pos.add(-4, 0, -4), pos.add(4, 1, 4)))
+			if (tickCounter > operationInterval) {
+				for (int i = -radius; i <= radius; i++) {
+					for (int j = -radius; j <= radius; j++) {
 
-						boolean isFarmland = earth instanceof BlockFarmland;
-						boolean isDirt = earth instanceof BlockDirt || earth instanceof BlockGrass;
+						if (i != 0 || j != 0) {
+							BlockPos earthPos = this.getPos().add(i,-1,j);	
+							IBlockState earthState = worldObj.getBlockState(earthPos);
+							Block earth = earthState.getBlock();
+							BlockPos plantPos = earthPos.up();
+							IBlockState plantState = worldObj.getBlockState(plantPos);
+							Block plant = plantState.getBlock();
 
-						// Till & water the earth
-						if (isDirt && (!isFarmland || earthState.getValue(BlockFarmland.MOISTURE) < 7)) {
-							IBlockState stateToModify = isFarmland ? earthState : Blocks.FARMLAND.getDefaultState();
-							if (hasIrrigator)
-								worldObj.setBlockState(earthPos, stateToModify.withProperty(BlockFarmland.MOISTURE, 7), 2);
-							else 
-								worldObj.setBlockState(earthPos, stateToModify, 2);								
-						}
+							boolean isFarmland = earth instanceof BlockFarmland;
+							boolean isDirt = earth instanceof BlockDirt || earth instanceof BlockGrass;
 
-						isFarmland = earth instanceof BlockFarmland;
-						if (!cropActionTaken) {	
-							// Plant seeds!
-							if (isFarmland && this.worldObj.isAirBlock(plantPos)) {
-								ItemStack inputStack = itemStackHandler.getStackInSlot(0);
-
-								if (inputStack != null && inputStack.getItem() instanceof IPlantable) {								
-									IPlantable crop = (IPlantable) itemStackHandler.getStackInSlot(0).getItem();
-									IBlockState cropState = crop.getPlant(worldObj, plantPos);
-
-									//inputStack = decrementStack(inputStack, 1);
-
-									if (inputStack != null)
-										worldObj.setBlockState(plantPos, cropState, 7);
-									cropActionTaken = true;
-								}
-
+							// Irrigate all blocks
+							if ((isFarmland && earthState.getValue(BlockFarmland.MOISTURE) < 7) && hasIrrigator) {
+								IBlockState irrigated = Blocks.FARMLAND.getDefaultState().withProperty(BlockFarmland.MOISTURE, 7);
+								worldObj.setBlockState(earthPos, irrigated, 2);		
 							}
 
 
+							// Till Current Block
+							if (isDirt) {
+								IBlockState tilled = Blocks.FARMLAND.getDefaultState();
+								worldObj.setBlockState(earthPos, tilled, 2);		
+							}
+
+							// +Tick Current Block
 							// Tick the crops
-							// FIXME only ticks first couple of crops because of the way we loop through the blocks
-							if (!fertActionTaken && hasFertilizer && rand.nextInt(100) <= fertilizerChance) {
-								if (!this.worldObj.isAirBlock(plantPos)) {
-									IBlockState plantState = this.worldObj.getBlockState(plantPos);
-									Block plant = plantState.getBlock();
+							if (hasFertilizer && rand.nextInt(100) <= fertilizerChance) {
+								if (plant instanceof BlockCrops) {
+									int oldgrowth = plant.getMetaFromState(plantState);
+									plant.updateTick(this.worldObj, plantPos, plantState, rand);
+									int newgrowth = plant.getMetaFromState(this.worldObj.getBlockState(plantPos));
 
-									if ((plant instanceof IGrowable || plant instanceof IPlantable) && !(plant instanceof BlockGrass)) {
-										plant.updateTick(this.worldObj, plantPos, plantState, rand);
-										IBlockState newState = this.worldObj.getBlockState(plantPos);
-										if (newState.getBlock().getMetaFromState(newState) != plant.getMetaFromState(plantState)) {
-											this.worldObj.playEvent(2005,  plantPos,  0);
-										}
-										fertActionTaken = true;
+									if (oldgrowth != newgrowth) {
+										this.worldObj.playEvent(2005,  plantPos,  0);
 									}
 								}
 							}
 
-							// Harvest the crops							
-							IBlockState cropState = this.worldObj.getBlockState(plantPos);
-							Block cropBlock = cropState.getBlock();
+							// Harvest Current Block
 
-							if (cropBlock instanceof IGrowable) {
-								if (!((IGrowable)cropBlock).canGrow(worldObj, plantPos, cropState, true)) {
-									List<ItemStack> drops = cropBlock.getDrops(worldObj, plantPos, cropState, 0);
-									worldObj.removeTileEntity(plantPos);
-									worldObj.setBlockToAir(plantPos);
+							isFarmland = earth instanceof BlockFarmland;
+							if (!plantAction) {	
+								// Plant seeds!
+								if (isFarmland && this.worldObj.isAirBlock(plantPos)) {
+									ItemStack inputStack = itemStackHandler.getStackInSlot(0);
 
-									if(drops != null) {
-										for(ItemStack drop : drops) {
-											// Start at slot 1. Refresh slot 0 later.
-											inventoryHasRoom = addToItemStackHandler(itemStackHandler, drop, 1, "+-> ");
-										}
+									if (inputStack != null && inputStack.getItem() instanceof IPlantable) {								
+										IPlantable crop = (IPlantable) itemStackHandler.getStackInSlot(0).getItem();
+										IBlockState cropState = crop.getPlant(worldObj, plantPos);
+
+										//inputStack = decrementStack(inputStack, 1);
+
+										if (inputStack != null)
+											worldObj.setBlockState(plantPos, cropState, 7);
+										plantAction = true;
+										tickCounter = 0;
 									}
-									cropActionTaken = true;
+
+								}
+
+							}
+							
+
+							// Harvest the crops		
+							if (!harvestAction) {
+								IBlockState cropState = this.worldObj.getBlockState(plantPos);
+								Block cropBlock = cropState.getBlock();
+	
+								if (cropBlock instanceof IGrowable) {
+									if (!((IGrowable)cropBlock).canGrow(worldObj, plantPos, cropState, true)) {
+										List<ItemStack> drops = cropBlock.getDrops(worldObj, plantPos, cropState, 0);
+										worldObj.removeTileEntity(plantPos);
+										worldObj.setBlockToAir(plantPos);
+	
+										if(drops != null) {
+											for(ItemStack drop : drops) {
+												// Start at slot 1. Refresh slot 0 later.
+												inventoryHasRoom = addToItemStackHandler(itemStackHandler, drop, 1, "+-> ");
+											}
+										}
+										harvestAction = true;
+										tickCounter = 0;
+									}
 								}
 							}
-
-
 						}
 					}
 				}
+				tickCounter = 0;
 			}
-			//}
-
-
 
 		}
 

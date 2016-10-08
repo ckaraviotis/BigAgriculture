@@ -1,5 +1,6 @@
 package solipsists.bigagriculture.tileentity;
 
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 
 /***

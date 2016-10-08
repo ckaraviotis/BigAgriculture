@@ -41,6 +41,7 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 	public BlockController() {
 		super(Material.ROCK);
 		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+		this.setLightLevel(7f);
 				
 		setUnlocalizedName(BigAgriculture.MODID + ".controller");
 		setRegistryName("controller");			
@@ -64,6 +65,8 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 		
 		TileController tc = (TileController) t;
 
+		tc.render();
+		
 		String active = tc.isActive ? "ACTIVE" : "INACTIVE" ;
 		String invStatus = tc.inventoryHasRoom ? "NOT FULL" : "FULL";
 		
