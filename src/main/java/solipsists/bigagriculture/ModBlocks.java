@@ -6,6 +6,7 @@ import solipsists.bigagriculture.block.BlockController;
 import solipsists.bigagriculture.block.BlockExpander;
 import solipsists.bigagriculture.block.BlockFertilizer;
 import solipsists.bigagriculture.block.BlockGenerator;
+import solipsists.bigagriculture.block.BlockIrrigatedFarmland;
 
 public class ModBlocks {
 	
@@ -13,12 +14,14 @@ public class ModBlocks {
 	public static BlockGenerator generator;
 	public static BlockExpander expander;
 	public static BlockFertilizer fertilizer;
+	public static BlockIrrigatedFarmland irrigatedFarmland;
 	
 	public static void init() {
 		controller = new BlockController();	
 		generator = new BlockGenerator();
 		expander = new BlockExpander();
 		fertilizer = new BlockFertilizer();
+		irrigatedFarmland = new BlockIrrigatedFarmland();
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -27,6 +30,7 @@ public class ModBlocks {
 		generator.initModel();
 		expander.initModel();
 		fertilizer.initModel();
+		irrigatedFarmland.initModel();
 	}
 	
 	@SideOnly(Side.CLIENT)

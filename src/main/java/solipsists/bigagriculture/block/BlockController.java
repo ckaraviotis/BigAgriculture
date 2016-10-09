@@ -65,7 +65,7 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 		
 		TileController tc = (TileController) t;
 
-		tc.render();
+		//tc.render();
 		
 		String active = tc.isActive ? "ACTIVE" : "INACTIVE" ;
 		String invStatus = tc.inventoryHasRoom ? "NOT FULL" : "FULL";

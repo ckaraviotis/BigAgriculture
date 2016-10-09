@@ -6,11 +6,7 @@ public class MultiblockEntry {
 	public BlockPos pos;
 	public Boolean checked;
 	public Boolean valid;
-	public enum type {
-		CONTROLLER,
-		EXPANDER,
-		FERTILIZER
-	}
+	public Multiblock.TYPE type;
 	
 	public MultiblockEntry (BlockPos pos) {
 		this.pos = pos;

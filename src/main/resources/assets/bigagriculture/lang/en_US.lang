@@ -1,2 +1,5 @@
-tile.bigagriculture.controller.name=Controller
+tile.bigagriculture.controller.name=Farm Controller
+tile.bigagriculture.expander.name=Farm Expander
 tile.bigagriculture.generator.name=Generator
+tile.bigagriculture.fertilizer.name=Crop Accelerator
+tile.bigagriculture.irrigatedFarmland.name=Irrigated Soil

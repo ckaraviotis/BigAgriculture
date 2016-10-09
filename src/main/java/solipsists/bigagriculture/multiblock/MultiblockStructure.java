@@ -28,9 +28,12 @@ public class MultiblockStructure {
 
 	private BlockPos boundsMin;
 	private BlockPos boundsMax;
+
+	// The physical machine blocks (ie no Air blocks)
+	private BlockPos actualBoundsMin;
+	private BlockPos actualBoundsMax;
 	 
-	private boolean boundsContain(BlockPos pos) {
-		
+	public boolean boundsContain(BlockPos pos) {		
 		for(Iterator<BlockPos> it = BlockPos.getAllInBox(boundsMin, boundsMax).iterator(); it.hasNext();) {
 			BlockPos current = it.next();
 			if (pos.equals(current)) {
@@ -38,17 +41,32 @@ public class MultiblockStructure {
 			}
 		}		
 		return false;
-
+	}
+	
+	public boolean actualBoundsContain(BlockPos pos) {
+		for(Iterator<BlockPos> it = BlockPos.getAllInBox(actualBoundsMin, actualBoundsMax).iterator(); it.hasNext();) {
+			BlockPos current = it.next();
+			if (pos.equals(current)) {
+				return true;
+			}
+		}		
+		return false;
+	}
+	
+	private int size() {
+		return structure.size();
 	}
 		
 	private void adjustBounds(BlockPos pos) {		
 		
 		if (boundsMin == null) {
 			boundsMin = pos;
+			actualBoundsMin = pos;
 		}
 		
 		if (boundsMax == null) {
 			boundsMax = pos;
+			actualBoundsMax = pos;
 		}
 		
 		// Not in bounds! Re-create catching new coords
@@ -86,13 +104,17 @@ public class MultiblockStructure {
 			
 			boundsMin = new BlockPos(minX, minY, minZ);
 			boundsMax = new BlockPos(maxX, maxY, maxZ);
+			
+			actualBoundsMin = boundsMin.add(1,0,1);
+			actualBoundsMax = boundsMax.add(-1,-1,-1);
 		}
 	}
 	
-	public void add(BlockPos pos) {		
+	public void add(BlockPos pos, Multiblock.TYPE type) {		
 		adjustBounds(pos);			
 		
 		MultiblockEntry m = new MultiblockEntry(pos);
+		m.type = type;
 		MultiblockEntry old = structure.put(key(pos), m);
 	}	
 	
@@ -145,15 +167,31 @@ public class MultiblockStructure {
 		// TODO add new block with material air to work as boundary marker
 		IBlockState marker = Blocks.LAPIS_BLOCK.getDefaultState();
 		world.setBlockState(boundsMin, marker);
+		
+		marker = Blocks.REDSTONE_BLOCK.getDefaultState();
 		world.setBlockState(boundsMax, marker);
+		
+		/*
+		// These will break the Multiblock
+		marker = Blocks.EMERALD_BLOCK.getDefaultState();
+		world.setBlockState(actualBoundsMin, marker);
+		
+		marker = Blocks.DIAMOND_BLOCK.getDefaultState();
+		world.setBlockState(actualBoundsMax, marker);
+		*/
 	}
 	
 	public void render(World world) {
 		fakeRender(world);
 	}
 
-	public int getMultiblockRadius(World world, int radius) {
-		int rad = radius;
+	/**
+	 * Get the operating radius of the multiblock, after counting Expanders.
+	 * @param world
+	 * @return
+	 */
+	public int getMultiblockRadius(World world){ //, int radius) {
+		int rad = 1;
 		
 		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
 			Block b = world.getBlockState(pair.getValue().pos).getBlock();
@@ -163,6 +201,31 @@ public class MultiblockStructure {
 			}
 		}
 		return rad;
+	}
+	
+	public int getBlocksOfType(Multiblock.TYPE type) {
+		int b = 0;
+		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+			MultiblockEntry entry = pair.getValue();
+			
+			if (entry.type == type) {
+				b += 1;
+			}
+		}
+		/*
+		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
+			Block b = this.worldObj.getBlockState(pair.getKey()).getBlock();
+
+			if (b instanceof BlockFertilizer) {
+				TileFertilizer t = (TileFertilizer)worldObj.getTileEntity(pair.getKey());
+				chance += t.CHANCE;
+			}
+		}
+
+		if (chance > 100)
+			chance = 100;
+		*/
+		return b;
 	}
 
 }

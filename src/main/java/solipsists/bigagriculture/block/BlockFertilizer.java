@@ -15,9 +15,15 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.BigAgriculture;
+import solipsists.bigagriculture.multiblock.Multiblock;
+import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
 import solipsists.bigagriculture.tileentity.TileFertilizer;
 
 public class BlockFertilizer extends BlockMultiblock implements ITileEntityProvider {
+	
+	public static final Multiblock.TYPE type = TYPE.FERTILIZER;
+	public static final double CHANCE = 0.5;
+	
 	public BlockFertilizer() {
 		super(Material.ROCK);
 		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
@@ -44,6 +50,11 @@ public class BlockFertilizer extends BlockMultiblock implements ITileEntityProvi
 	
 	private TileFertilizer getTE(IBlockAccess world, BlockPos pos) {
 		return (TileFertilizer) world.getTileEntity(pos);
+	}
+	
+	@Override
+	public Multiblock.TYPE getType() {
+		return type;
 	}
 	
 }
