@@ -50,6 +50,11 @@ public class BlockIrrigatedFarmland extends BlockFarmland {
 		return true;
     }
     
+    @Override
+    public boolean isFertile(World world, BlockPos pos) {
+    	return true;
+    }
+    
 		
 	@SideOnly(Side.CLIENT)
 	public void initModel() {
