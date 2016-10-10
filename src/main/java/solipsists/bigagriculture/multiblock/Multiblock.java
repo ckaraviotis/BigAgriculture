@@ -23,8 +23,6 @@ import solipsists.bigagriculture.tileentity.TileMultiblock;
 
 /***
  * Container for multiblock structure data
- * @author Chris
- *
  */
 public class Multiblock {
 
@@ -174,7 +172,6 @@ public class Multiblock {
 
 				if (isValidBlock) {
 					structure.setValid(neighbour, true);
-					//BigAgriculture.logger.log(Level.INFO, "Block "+ b.getUnlocalizedName() + " marked as valid.");
 					
 					TileMultiblock t = (TileMultiblock)world.getTileEntity(neighbour);
 					t.CHECKED = true;

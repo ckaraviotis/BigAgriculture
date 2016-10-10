@@ -5,8 +5,6 @@ import net.minecraft.tileentity.TileEntity;
 
 /***
  * Extend me to be a valid multiblock tile
- * @author spaceface
- *
  */
 public class TileMultiblock extends TileEntity {
 

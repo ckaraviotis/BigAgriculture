@@ -72,20 +72,6 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 			return true;
 		}
 		
-		TileEntity t = worldIn.getTileEntity(pos);
-		if (!(t instanceof TileController))
-			return false;
-		
-		TileController tc = (TileController) t;
-
-		//tc.render();
-		
-		String active = tc.isActive ? "ACTIVE" : "INACTIVE" ;
-		String invStatus = tc.inventoryHasRoom ? "NOT FULL" : "FULL";
-		
-		playerIn.addChatComponentMessage(new TextComponentString("Controller is " + active));
-		playerIn.addChatComponentMessage(new TextComponentString("Controller inventory status " + invStatus));
-		
 		playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		return true;
 	}
@@ -106,13 +92,11 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
    
    @Override
    public IBlockState getStateFromMeta(int meta) {
-       // Since we only allow horizontal rotation we need only 2 bits for facing. North, South, West, East start at index 2 so we have to add 2 here.
        return getDefaultState().withProperty(FACING, EnumFacing.getFront((meta & 3)));
    }
 
    @Override
    public int getMetaFromState(IBlockState state) {
-       // Since we only allow horizontal rotation we need only 2 bits for facing. North, South, West, East start at index 2 so we have to subtract 2 here.
        return state.getValue(FACING).getIndex();
    }
 
@@ -140,7 +124,6 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 
        return p.getHorizontalFacing().getOpposite();
    }
-
 	
 		
 	@SideOnly(Side.CLIENT)

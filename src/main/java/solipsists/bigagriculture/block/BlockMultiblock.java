@@ -6,8 +6,6 @@ import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
 
 /***
  * Extend me to be a valid multiblock
- * @author spaceface
- *
  */
 public class BlockMultiblock extends BlockGenericBA {
 	

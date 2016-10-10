@@ -61,9 +61,6 @@ public class BlockIrrigatedFarmland extends BlockFarmland {
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {		
         int i = ((Integer)state.getValue(MOISTURE)).intValue();
-        
-        // TODO: Revert to dirt if no controller nearby
-        //worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState());
 
         if (i < 7)
         {
