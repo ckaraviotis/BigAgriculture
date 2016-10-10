@@ -240,15 +240,19 @@ public class TileController extends TileMultiblock implements ITickable {
 		IBlockState state = worldObj.getBlockState(pos);
 		Block plant = state.getBlock();
 		
+		IBlockState ground = worldObj.getBlockState(pos.add(0,-1,0));
+		
 		// Increase Age of current crop if
 		if (hasFertilizer && rand.nextDouble() <= fertilizerChance) {
-			if (plant instanceof BlockCrops) {
-				PropertyInteger AGE = PropertyInteger.create("age", 0, 7);
-				int i = state.getValue(AGE);
-				if (i < 7) {
-					worldObj.setBlockState(pos, state.withProperty(AGE, i+1));
-					worldObj.playEvent(2005,  pos,  0);
+			if (plant instanceof BlockCrops) {	
+				if (ground.getBlock().isFertile(worldObj, pos.add(0,-1,0))) {
+					int i = state.getValue(BlockCrops.AGE);
+					if (i < ((BlockCrops)plant).getMaxAge()) {
+						worldObj.setBlockState(pos, state.withProperty(BlockCrops.AGE, i+1));
+						worldObj.playEvent(2005,  pos,  0);
+					}
 				}
+
 			}
 		}
 	}
