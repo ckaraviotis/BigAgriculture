@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "up": "bigagriculture:blocks/default",
+    "down": "bigagriculture:blocks/default",
+    "north": "bigagriculture:blocks/infinity_stone",
+    "south": "bigagriculture:blocks/infinity_stone",
+    "east": "bigagriculture:blocks/infinity_stone",
+    "west": "bigagriculture:blocks/infinity_stone",
+    "particle": "bigagriculture:blocks/infinity_stone"
+  }
+}

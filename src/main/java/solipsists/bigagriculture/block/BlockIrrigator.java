@@ -13,18 +13,15 @@ import solipsists.bigagriculture.multiblock.Multiblock;
 import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
 import solipsists.bigagriculture.tileentity.TileFertilizer;
 
-/***
- * Provides infinite plantable to slot0
- */
-public class BlockInfinityStone extends BlockMultiblock {
+public class BlockIrrigator extends BlockMultiblock {
 	
-	public static final Multiblock.TYPE type = TYPE.INFINITY_STONE;
+	public static final Multiblock.TYPE type = TYPE.IRRIGATOR;
 
-	public BlockInfinityStone() {
+	public BlockIrrigator() {
 		super(Material.ROCK);
 		
-		setUnlocalizedName(BigAgriculture.MODID + ".infinity_stone");
-		setRegistryName("infinity_stone");			
+		setUnlocalizedName(BigAgriculture.MODID + ".irrigator");
+		setRegistryName("irrigator");			
 		
 		// Register
 		GameRegistry.register(this);
