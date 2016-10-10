@@ -39,7 +39,8 @@ public class Multiblock {
 		EXPANDER,
 		FERTILIZER,
 		INFINITY_STONE,
-		IRRIGATOR
+		IRRIGATOR,
+		VOID_STONE
 	}
 	
 	/**

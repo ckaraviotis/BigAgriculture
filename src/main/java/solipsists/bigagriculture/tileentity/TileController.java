@@ -43,6 +43,7 @@ public class TileController extends TileMultiblock implements ITickable {
 	private double fertilizerChance = 0;
 	private boolean hasUnderground = false; // Build multiblock beneath the crops?
 	private boolean hasInfinityStone = false;
+	private boolean hasVoidStone = false;
 
 	public boolean inventoryHasRoom = true;
 
@@ -167,6 +168,9 @@ public class TileController extends TileMultiblock implements ITickable {
 	private boolean isInventoryFull() {
 		// Get stack count for each inv slot. If any are < max,
 		// return false.
+		if (hasVoidStone)
+			return false;
+		
 		for (int i = 0; i < itemStackHandler.getSlots(); i++) {
 			ItemStack itemStack = itemStackHandler.getStackInSlot(i);
 
@@ -303,6 +307,7 @@ public class TileController extends TileMultiblock implements ITickable {
 				hasFertilizer = fertilizerChance > 0; 
 				hasInfinityStone = multiblock.getBlocksOfType(Multiblock.TYPE.INFINITY_STONE) > 0;
 				hasIrrigator = multiblock.getBlocksOfType(Multiblock.TYPE.IRRIGATOR) > 0;
+				hasVoidStone = multiblock.getBlocksOfType(Multiblock.TYPE.VOID_STONE) > 0;
 			}
 
 			if (tickCounter > operationInterval) {

@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "up": "bigagriculture:blocks/default",
+    "down": "bigagriculture:blocks/default",
+    "north": "bigagriculture:blocks/void_stone",
+    "south": "bigagriculture:blocks/void_stone",
+    "east": "bigagriculture:blocks/void_stone",
+    "west": "bigagriculture:blocks/void_stone",
+    "particle": "bigagriculture:blocks/void_stone"
+  }
+}
