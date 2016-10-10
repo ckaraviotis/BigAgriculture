@@ -8,6 +8,7 @@ import solipsists.bigagriculture.block.BlockFertilizer;
 import solipsists.bigagriculture.block.BlockGenerator;
 import solipsists.bigagriculture.block.BlockInfinityStone;
 import solipsists.bigagriculture.block.BlockIrrigatedFarmland;
+import solipsists.bigagriculture.block.BlockIrrigator;
 
 public class ModBlocks {
 	
@@ -17,6 +18,7 @@ public class ModBlocks {
 	public static BlockFertilizer fertilizer;
 	public static BlockIrrigatedFarmland irrigatedFarmland;
 	public static BlockInfinityStone infinity_stone;
+	public static BlockIrrigator irrigator;
 	
 	public static void init() {
 		controller = new BlockController();	
@@ -25,6 +27,7 @@ public class ModBlocks {
 		fertilizer = new BlockFertilizer();
 		irrigatedFarmland = new BlockIrrigatedFarmland();
 		infinity_stone = new BlockInfinityStone();
+		irrigator = new BlockIrrigator();
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -35,6 +38,7 @@ public class ModBlocks {
 		fertilizer.initModel();
 		irrigatedFarmland.initModel();
 		infinity_stone.initModel();
+		irrigator.initModel();
 	}
 	
 	@SideOnly(Side.CLIENT)

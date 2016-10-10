@@ -38,7 +38,7 @@ public class TileController extends TileMultiblock implements ITickable {
 
 	public static final int SLOTS = 10;
 
-	private boolean hasIrrigator = true;
+	private boolean hasIrrigator = false;
 	private boolean hasFertilizer = false;
 	private double fertilizerChance = 0;
 	private boolean hasUnderground = false; // Build multiblock beneath the crops?
@@ -196,7 +196,12 @@ public class TileController extends TileMultiblock implements ITickable {
 		if (hasIrrigator && !(b instanceof BlockIrrigatedFarmland)) {
 			IBlockState irrigated = ModBlocks.irrigatedFarmland.getDefaultState();
 			worldObj.setBlockState(pos, irrigated, 2);	
-		}		
+		}
+		// Irrigator has been removed, reset to farmland
+		else if (!hasIrrigator && (b instanceof BlockIrrigatedFarmland)) {
+			IBlockState tilled = Blocks.FARMLAND.getDefaultState().withProperty(BlockFarmland.MOISTURE, 7);
+			worldObj.setBlockState(pos, tilled, 2);		
+		}
 		// Till Current Block
 		else if (isDirt) {
 			IBlockState tilled = Blocks.FARMLAND.getDefaultState().withProperty(BlockFarmland.MOISTURE, 7);
@@ -293,6 +298,7 @@ public class TileController extends TileMultiblock implements ITickable {
 				fertilizerChance = getFertilizerChance();
 				hasFertilizer = fertilizerChance > 0; 
 				hasInfinityStone = multiblock.getBlocksOfType(Multiblock.TYPE.INFINITY_STONE) > 0;
+				hasIrrigator = multiblock.getBlocksOfType(Multiblock.TYPE.IRRIGATOR) > 0;
 			}
 
 			if (tickCounter > operationInterval) {

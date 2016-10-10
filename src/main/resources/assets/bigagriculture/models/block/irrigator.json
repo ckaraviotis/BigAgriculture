@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "up": "bigagriculture:blocks/default",
+    "down": "bigagriculture:blocks/default",
+    "north": "bigagriculture:blocks/irrigator",
+    "south": "bigagriculture:blocks/irrigator",
+    "east": "bigagriculture:blocks/irrigator",
+    "west": "bigagriculture:blocks/irrigator",
+    "particle": "bigagriculture:blocks/irrigator"
+  }
+}
