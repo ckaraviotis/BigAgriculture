@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.ModBlocks;
+import solipsists.bigagriculture.ModItems;
 import solipsists.bigagriculture.RenderWorldLastEventHandler;
 
 public class ClientProxy extends CommonProxy {
@@ -18,7 +19,8 @@ public class ClientProxy extends CommonProxy {
 		super.preInit(e);
 		OBJLoader.INSTANCE.addDomain(BigAgriculture.MODID);
 		
-		ModBlocks.initModels();		
+		ModBlocks.initModels();	
+		ModItems.initClient();
 	}
 	
 	@Override
@@ -26,7 +28,7 @@ public class ClientProxy extends CommonProxy {
 		super.init(e);
 		ModBlocks.initItemModels();
 		
-		//MinecraftForge.EVENT_BUS.register(new RenderWorldLastEventHandler());
+		// Register this so the event handler works
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 	

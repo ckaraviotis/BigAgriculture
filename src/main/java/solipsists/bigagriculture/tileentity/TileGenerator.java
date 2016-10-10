@@ -31,8 +31,6 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 	
 	@Override
 	public void update() {
-		BigAgriculture.instance.clientInfo.highlightBlock(this.pos, System.currentTimeMillis() + 1000);
-	
 		
 		if (!worldObj.isRemote) {
 			counter++;

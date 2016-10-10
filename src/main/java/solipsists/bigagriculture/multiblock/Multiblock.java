@@ -1,13 +1,15 @@
 package solipsists.bigagriculture.multiblock;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -58,6 +60,23 @@ public class Multiblock {
 		world.setBlockState(topRight, w);
 		world.setBlockState(botLeft, w);
 		world.setBlockState(botRight, w);
+	}
+	
+	public Set<BlockPos> getSoil() {
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		
+		if (controller != null) {
+			BlockPos topLeft  = controller.add(-RADIUS, -1, -RADIUS);
+			BlockPos botRight = controller.add(RADIUS, -1, RADIUS);
+			
+			
+			for (Iterator<BlockPos> it = BlockPos.getAllInBox(topLeft, botRight).iterator(); it.hasNext();) {
+				set.add(it.next());
+			}
+		}
+
+		
+		return set;
 	}
 	
 	/**
@@ -179,19 +198,22 @@ public class Multiblock {
 	 */
 	public int getMultiblockRadius(World world) {
 		return structure.getMultiblockRadius(world);
+	}	
+	
+	/**
+	 * Get the number of blocks of a specific type in the multiblock
+	 * @param type
+	 * @return
+	 */
+	public int getBlocksOfType(Multiblock.TYPE type) {
+		return structure.getBlocksOfType(type);
 	}
 	
 	/**
-	 * Place debug blocks.
-	 * TODO remove? Maybe leave in for a call on a debug item
-	 * @param world
+	 * Render around all blocks contained in structure
 	 */
-	public void render(World world) {
-		this.structure.render(world);
-	}
-	
-	public int getBlocksOfType(Multiblock.TYPE type) {
-		return structure.getBlocksOfType(type);
+	public void highlight() {
+		structure.highlight();
 	}
 	
 }

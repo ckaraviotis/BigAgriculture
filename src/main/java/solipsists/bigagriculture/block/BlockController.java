@@ -31,16 +31,18 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.BigAgriculture;
+import solipsists.bigagriculture.multiblock.Multiblock;
+import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
 import solipsists.bigagriculture.tileentity.TileController;
 
 public class BlockController extends BlockMultiblock implements ITileEntityProvider {
 	
 	public static final int GUI_ID = 1;
 	public static final PropertyDirection FACING = PropertyDirection.create("facing");
+	public static final Multiblock.TYPE type = TYPE.CONTROLLER;
 
 	public BlockController() {
 		super(Material.ROCK);
-		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 		this.setLightLevel(7f);
 				
 		setUnlocalizedName(BigAgriculture.MODID + ".controller");
@@ -51,6 +53,17 @@ public class BlockController extends BlockMultiblock implements ITileEntityProvi
 		GameRegistry.register(new ItemBlock(this), getRegistryName());
 		GameRegistry.registerTileEntity(TileController.class, BigAgriculture.MODID + "_controller");
 	}
+	
+	@Override
+	public void onBlockHarvested(World world, BlockPos pos, IBlockState state, EntityPlayer player)
+    {
+		// Destroy any Irrigated Farmland
+		TileEntity te = world.getTileEntity(pos);
+		
+		if (te != null) {
+			((TileController) te).saltTheEarth();
+		}
+    }
 	
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {

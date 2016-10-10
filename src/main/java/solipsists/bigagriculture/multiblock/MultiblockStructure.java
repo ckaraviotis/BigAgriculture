@@ -1,21 +1,13 @@
 package solipsists.bigagriculture.multiblock;
 
-import java.awt.Color;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-
-import org.apache.logging.log4j.Level;
-import org.lwjgl.opengl.GL11;
+import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import solipsists.bigagriculture.BigAgriculture;
@@ -26,13 +18,32 @@ public class MultiblockStructure {
 	
 	private HashMap<String, MultiblockEntry> structure = new HashMap();	
 
+	// The bounds of the multiblock, with 1block padding on each facing except .down()
 	private BlockPos boundsMin;
 	private BlockPos boundsMax;
 
-	// The physical machine blocks (ie no Air blocks)
+	// The actual bounds, ie no padding.
 	private BlockPos actualBoundsMin;
 	private BlockPos actualBoundsMax;
+	
+	/**
+	 * Render around all blocks contained in structure 
+	 */
+	public void highlight() {		
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		
+		for (Iterator<BlockPos> it = BlockPos.getAllInBox(actualBoundsMin, actualBoundsMax).iterator(); it.hasNext();) {
+			set.add(it.next());
+		}
+		
+		BigAgriculture.instance.clientInfo.highlightBlocks(set, System.currentTimeMillis() + 10000);
+	}
 	 
+	/**
+	 * Return true if the bounds contain the given BlockPos
+	 * @param pos
+	 * @return
+	 */
 	public boolean boundsContain(BlockPos pos) {		
 		for(Iterator<BlockPos> it = BlockPos.getAllInBox(boundsMin, boundsMax).iterator(); it.hasNext();) {
 			BlockPos current = it.next();
@@ -43,6 +54,11 @@ public class MultiblockStructure {
 		return false;
 	}
 	
+	/**
+	 * Return true if the ACTUAL bounds contain the given BlockPos.
+	 * @param pos
+	 * @return
+	 */
 	public boolean actualBoundsContain(BlockPos pos) {
 		for(Iterator<BlockPos> it = BlockPos.getAllInBox(actualBoundsMin, actualBoundsMax).iterator(); it.hasNext();) {
 			BlockPos current = it.next();
@@ -53,10 +69,18 @@ public class MultiblockStructure {
 		return false;
 	}
 	
+	/**
+	 * The number of blocks in the structure
+	 * @return
+	 */
 	private int size() {
 		return structure.size();
 	}
 		
+	/**
+	 * Extend the bounds of the structure to include the given BlockPos
+	 * @param pos
+	 */
 	private void adjustBounds(BlockPos pos) {		
 		
 		if (boundsMin == null) {
@@ -110,6 +134,11 @@ public class MultiblockStructure {
 		}
 	}
 	
+	/**
+	 * Add a BlockPos of a given Type to the structure.
+	 * @param pos The BlockPos to add to the structure.
+	 * @param type The Type of the multiblock.
+	 */
 	public void add(BlockPos pos, Multiblock.TYPE type) {		
 		adjustBounds(pos);			
 		
@@ -118,30 +147,62 @@ public class MultiblockStructure {
 		MultiblockEntry old = structure.put(key(pos), m);
 	}	
 	
+	/**
+	 * Remove a given BlockPos from the structure.
+	 * @param pos
+	 */
 	public void remove(BlockPos pos) {
 		structure.remove(key(pos));
 	}
 	
+	/**
+	 * Reset the structure.
+	 */
 	public void clear() {
 		structure.clear();
 	}
 	
+	/**
+	 * Return the checked flag for the given BlockPos
+	 * @param pos
+	 * @return
+	 */
 	public boolean getChecked(BlockPos pos) {
 		return structure.get(key(pos)).checked;
 	}
 	
+	/**
+	 * Set the checked flag for the given BlockPos
+	 * @param pos
+	 * @param checked
+	 */
 	public void setChecked(BlockPos pos, boolean checked) {
 		structure.get(key(pos)).checked = checked;
 	}
 	
+	/**
+	 * Get the valid flag for the given BlockPos
+	 * @param pos
+	 * @return
+	 */
 	public boolean getValid(BlockPos pos) {
 		return structure.get(key(pos)).valid;
 	}
 	
+	/**
+	 * Set the valid flag for the given BlockPos
+	 * @param pos
+	 * @param valid
+	 */
 	public void setValid(BlockPos pos, boolean valid) {
 		structure.get(key(pos)).valid = valid;
 	}
 	
+	/**
+	 * Return true if the structure contains the given BlockPos.
+	 * @param pos
+	 * @return
+	 */
 	public boolean contains(BlockPos pos) {				
 		if (structure.containsKey(key(pos)))
 			return true;
@@ -149,7 +210,11 @@ public class MultiblockStructure {
 			return false;
 	}
 	
-	// TODO better way of iterating over the structure?
+	
+	/**
+	 * Return true if the structure is a valid multiblock.
+	 * @return
+	 */
 	public boolean isValid() {
 		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
 			if (pair.getValue().checked == false)
@@ -159,32 +224,15 @@ public class MultiblockStructure {
 		return true;
 	}
 	
+	/**
+	 * Generate the key for the structure map.
+	 * @param pos
+	 * @return
+	 */
 	private String key(BlockPos pos) {
 		return "mb:" + pos.getX() + pos.getY() + pos.getZ();
 	}
 	
-	private void fakeRender(World world) {	
-		// TODO add new block with material air to work as boundary marker
-		IBlockState marker = Blocks.LAPIS_BLOCK.getDefaultState();
-		world.setBlockState(boundsMin, marker);
-		
-		marker = Blocks.REDSTONE_BLOCK.getDefaultState();
-		world.setBlockState(boundsMax, marker);
-		
-		/*
-		// These will break the Multiblock
-		marker = Blocks.EMERALD_BLOCK.getDefaultState();
-		world.setBlockState(actualBoundsMin, marker);
-		
-		marker = Blocks.DIAMOND_BLOCK.getDefaultState();
-		world.setBlockState(actualBoundsMax, marker);
-		*/
-	}
-	
-	public void render(World world) {
-		fakeRender(world);
-	}
-
 	/**
 	 * Get the operating radius of the multiblock, after counting Expanders.
 	 * @param world
@@ -203,6 +251,11 @@ public class MultiblockStructure {
 		return rad;
 	}
 	
+	/**
+	 * Get the number of blocks of a specific type in the structure.
+	 * @param type
+	 * @return
+	 */
 	public int getBlocksOfType(Multiblock.TYPE type) {
 		int b = 0;
 		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
@@ -212,19 +265,6 @@ public class MultiblockStructure {
 				b += 1;
 			}
 		}
-		/*
-		for (HashMap.Entry<BlockPos, Boolean> pair : tMultiBlock.entrySet()) {
-			Block b = this.worldObj.getBlockState(pair.getKey()).getBlock();
-
-			if (b instanceof BlockFertilizer) {
-				TileFertilizer t = (TileFertilizer)worldObj.getTileEntity(pair.getKey());
-				chance += t.CHANCE;
-			}
-		}
-
-		if (chance > 100)
-			chance = 100;
-		*/
 		return b;
 	}
 

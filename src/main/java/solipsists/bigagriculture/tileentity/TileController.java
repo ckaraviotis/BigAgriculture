@@ -2,8 +2,7 @@ package solipsists.bigagriculture.tileentity;
 
 import java.util.List;
 import java.util.Random;
-
-import org.apache.logging.log4j.Level;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
@@ -25,7 +24,6 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.ModBlocks;
 import solipsists.bigagriculture.block.BlockFertilizer;
 import solipsists.bigagriculture.block.BlockIrrigatedFarmland;
@@ -64,6 +62,10 @@ public class TileController extends TileMultiblock implements ITickable {
 	@Deprecated
 	public boolean changeItem(ItemStack item, EntityPlayer player) {	
 		return false;
+	}
+	
+	public void highlightMultiblock() {
+		multiblock.highlight();
 	}
 
 	// Inventory slots
@@ -189,10 +191,6 @@ public class TileController extends TileMultiblock implements ITickable {
 		return true;
 	}
 	
-	public void render() {
-		multiblock.render(worldObj);
-	}
-	
 	private boolean till(BlockPos pos) {
 		// Irrigation and tilling happens on the block BELOW current
 		pos = pos.add(0,-1,0);
@@ -313,6 +311,8 @@ public class TileController extends TileMultiblock implements ITickable {
 			// TODO: Allow planting of pumpkins / melons. Stems marked as invalid blocks & fertilizer doesn't work.
 			// TODO: Allow planting of Trees & Reeds.
 			// TODO: Look at code for TFTools Storage Scanner for block-highlighting code (for outlining multiblocks)
+			// TODO: Irrigated soil degrades into sand/dirt if multiblock is removed.
+			// TODO: Radius determined from multiblock center, not controller.
 			if (tickCounter > operationInterval) {
 				
 				BlockPos current = multiblock.getNext();
@@ -333,6 +333,21 @@ public class TileController extends TileMultiblock implements ITickable {
 
 		}
 
+	}
+
+	/***
+	 * Destroy any Irrigated Farmland blocks
+	 */
+	public void saltTheEarth() {
+		
+		IBlockState state = Blocks.FARMLAND.getDefaultState().withProperty(BlockFarmland.MOISTURE, 7);
+		
+		if (multiblock.getSoil().size() > 0) {
+			for (BlockPos pos : multiblock.getSoil()) {
+				worldObj.setBlockState(pos, state);
+			}
+		}
+		
 	}
 
 

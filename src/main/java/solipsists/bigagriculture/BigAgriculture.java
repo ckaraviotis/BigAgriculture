@@ -2,6 +2,8 @@ package solipsists.bigagriculture;
 
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -27,6 +29,14 @@ public class BigAgriculture {
 	@Mod.Instance
 	public static BigAgriculture instance;
 	public static Logger logger;
+	
+	public static CreativeTabs tabBigAgriculture = new CreativeTabs("Big Agriculture") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ModItems.debugWand;
+		}
+	};
 
 	@Mod.EventHandler
 	public void PreInit(FMLPreInitializationEvent e) {

@@ -1,6 +1,5 @@
 package solipsists.bigagriculture.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import solipsists.bigagriculture.multiblock.Multiblock;
 import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
@@ -10,7 +9,7 @@ import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
  * @author spaceface
  *
  */
-public class BlockMultiblock extends Block {
+public class BlockMultiblock extends BlockGenericBA {
 	
 	public static final Multiblock.TYPE type = TYPE.DEFAULT;
 

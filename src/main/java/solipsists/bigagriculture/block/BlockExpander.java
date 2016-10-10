@@ -16,14 +16,17 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.BigAgriculture;
+import solipsists.bigagriculture.multiblock.Multiblock;
+import solipsists.bigagriculture.multiblock.Multiblock.TYPE;
 import solipsists.bigagriculture.tileentity.TileController;
 import solipsists.bigagriculture.tileentity.TileExpander;
 
 public class BlockExpander extends BlockMultiblock implements ITileEntityProvider {
 
+	public static final Multiblock.TYPE type = TYPE.EXPANDER;
+	
 	public BlockExpander() {
 		super(Material.ROCK);
-		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 				
 		setUnlocalizedName(BigAgriculture.MODID + ".expander");
 		setRegistryName("expander");			

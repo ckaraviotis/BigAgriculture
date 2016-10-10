@@ -26,7 +26,6 @@ public class BlockFertilizer extends BlockMultiblock implements ITileEntityProvi
 	
 	public BlockFertilizer() {
 		super(Material.ROCK);
-		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 				
 		setUnlocalizedName(BigAgriculture.MODID + ".fertilizer");
 		setRegistryName("fertilizer");			

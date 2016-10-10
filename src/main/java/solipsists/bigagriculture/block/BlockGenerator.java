@@ -27,7 +27,6 @@ public class BlockGenerator extends Block implements ITileEntityProvider {
 
 	public BlockGenerator() {
 		super(Material.ROCK);
-		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 				
 		setUnlocalizedName(BigAgriculture.MODID + ".generator");
 		setRegistryName("generator");			
