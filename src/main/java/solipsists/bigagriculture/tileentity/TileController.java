@@ -38,17 +38,18 @@ public class TileController extends TileMultiblock implements ITickable {
 
 	public static final int SLOTS = 10;
 
-	public boolean hasIrrigator = true;
-	public boolean hasFertilizer = false;
+	private boolean hasIrrigator = true;
+	private boolean hasFertilizer = false;
 	private double fertilizerChance = 0;
-	public boolean hasUnderground = false; // Build multiblock beneath the crops?
+	private boolean hasUnderground = false; // Build multiblock beneath the crops?
+	private boolean hasInfinityStone = false;
 
 	public boolean inventoryHasRoom = true;
 
 	private EntityPlayer owner;
 
 	// Multiblock vars
-	public int multiBlockRefresh = 1000;
+	private int multiBlockRefresh = 1000;
 	public boolean isActive = false;	// is multiblock complete?
 	private Multiblock multiblock = new Multiblock();
 	
@@ -218,7 +219,8 @@ public class TileController extends TileMultiblock implements ITickable {
 				IPlantable crop = (IPlantable) itemStackHandler.getStackInSlot(0).getItem();
 				IBlockState cropState = crop.getPlant(worldObj, pos);
 
-				inputStack = decrementStack(inputStack, 1);
+				if (!hasInfinityStone)
+					inputStack = decrementStack(inputStack, 1);
 
 				if (inputStack != null)
 					worldObj.setBlockState(pos, cropState, 7);
@@ -290,6 +292,7 @@ public class TileController extends TileMultiblock implements ITickable {
 				isActive = multiblockValid;
 				fertilizerChance = getFertilizerChance();
 				hasFertilizer = fertilizerChance > 0; 
+				hasInfinityStone = multiblock.getBlocksOfType(Multiblock.TYPE.INFINITY_STONE) > 0;
 			}
 
 			if (tickCounter > operationInterval) {

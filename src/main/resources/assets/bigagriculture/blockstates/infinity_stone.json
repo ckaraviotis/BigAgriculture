@@ -1,0 +1,10 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "model": "bigagriculture:infinity_stone"
+    },
+    "variants": {
+        "normal": [{}],
+        "inventory": [{}]
+    }
+}

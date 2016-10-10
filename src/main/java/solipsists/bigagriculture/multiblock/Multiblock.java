@@ -37,7 +37,8 @@ public class Multiblock {
 		DEFAULT,
 		CONTROLLER,
 		EXPANDER,
-		FERTILIZER
+		FERTILIZER,
+		INFINITY_STONE
 	}
 	
 	/**
