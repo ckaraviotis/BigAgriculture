@@ -7,21 +7,23 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.util.EnergyHandler;
 
-public class TileGenerator extends TileEntity implements ITickable, IEnergyStorage {
+public class TileGenerator extends TileEntity implements ITickable, IEnergyStorage, ICapabilityProvider {
 
-	public static int rfpertick = 20;
-	public static int capacity = 500000;
-	public static int maxReceive = 500000;
-	public static int maxExtract = 500000;
+	public int rfpertick = 20;
+	public int capacity = 500000;
+	public int maxReceive = 500000;
+	public int maxExtract = 500000;
 	
-	protected EnergyHandler energyStorage;
-	int counter = 0;
+	private EnergyHandler energyStorage;
+	private int counter = 0;
 	
 	public TileGenerator() {
 		energyStorage = new EnergyHandler(capacity, maxReceive, maxExtract);
@@ -29,6 +31,9 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 	
 	@Override
 	public void update() {
+		BigAgriculture.instance.clientInfo.highlightBlock(this.pos, System.currentTimeMillis() + 1000);
+	
+		
 		if (!worldObj.isRemote) {
 			counter++;
 			
@@ -38,30 +43,46 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 			}
 				
 			
-			if (counter % 20 == 0) {
+			if (counter % 40 == 0) {
 				counter = 1;
 				BigAgriculture.logger.log(Level.INFO, "Current Energy: " + getEnergyStored());			
 			}
+			
+			if (energyStorage.getEnergyStored() > rfpertick) {
+				
+				boolean provided = false;
+				for (EnumFacing f : EnumFacing.values()) {
+					TileEntity te = worldObj.getTileEntity(getPos().offset(f));
+					
+					if (te != null && te.hasCapability(CapabilityEnergy.ENERGY, f) && !provided) {
+						int ex = energyStorage.extractEnergy(rfpertick, false);
+						te.getCapability(CapabilityEnergy.ENERGY, f.getOpposite()).receiveEnergy(ex,  false);
+						provided = true;
+					}
+				}
+			}
+			
 		}			
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		int rf = compound.getInteger("energyStored");
+		int rf = compound.getInteger("energy");
 		energyStorage.setEnergy(rf);
 	}
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		super.writeToNBT(compound);
-		compound.setInteger("energyStored", energyStorage.getEnergyStored());
+		compound.setInteger("energy", energyStorage.getEnergyStored());
 		return compound;
 	}
 
 	@Override
 	public int receiveEnergy(int maxReceive, boolean simulate) {
-		return 0;
+		//return 0;
+		return energyStorage.receiveEnergy(maxReceive, simulate);
 	}
 
 	@Override
@@ -86,7 +107,7 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 
 	@Override
 	public boolean canReceive() {
-		return false;
+		return true;
 	}
 	
 	@Override

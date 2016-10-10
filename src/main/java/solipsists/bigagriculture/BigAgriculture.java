@@ -21,6 +21,9 @@ public class BigAgriculture {
 	@SidedProxy(clientSide = "solipsists.bigagriculture.proxy.ClientProxy", serverSide = "solipsists.bigagriculture.proxy.ServerProxy")
 	public static CommonProxy proxy;
 	
+	// Block highlight code from RFTools
+	public ClientInfo clientInfo = new ClientInfo();
+	
 	@Mod.Instance
 	public static BigAgriculture instance;
 	public static Logger logger;

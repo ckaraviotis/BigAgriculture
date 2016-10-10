@@ -38,7 +38,7 @@ public class TileController extends TileMultiblock implements ITickable {
 	//private static final int BASE_RADIUS = 1;
 	private int radius;
 	public int tickCounter = 0;
-	private int operationInterval = 10;
+	private int operationInterval = 0;
 	private Random rand = new Random();
 
 	public static final int SLOTS = 10;
@@ -299,9 +299,20 @@ public class TileController extends TileMultiblock implements ITickable {
 
 				isActive = multiblockValid;
 				fertilizerChance = getFertilizerChance();
-				hasFertilizer = fertilizerChance > 0;
+				hasFertilizer = fertilizerChance > 0; 
 			}
 
+			// TODO: Add block to increase refresh rate! Variable by number of blocks
+			// between per tick up to 2s
+			
+			// TODO: Energy acceptor block. Farm requires energy (Forge)
+			// TODO: Move storage into a separate block. More blocks = more storage.
+			// TODO: I/O Block to receive and export items
+			// TODO: Fluid I/O block. Allows water to be piped in. Cheaper than irrigator.
+			// TODO: Add irrigator block. Code already here for it to work. Should be expensive.
+			// TODO: Allow planting of pumpkins / melons. Stems marked as invalid blocks & fertilizer doesn't work.
+			// TODO: Allow planting of Trees & Reeds.
+			// TODO: Look at code for TFTools Storage Scanner for block-highlighting code (for outlining multiblocks)
 			if (tickCounter > operationInterval) {
 				
 				BlockPos current = multiblock.getNext();

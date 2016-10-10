@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.logging.log4j.Level;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.Config;
 import solipsists.bigagriculture.ModBlocks;
+import solipsists.bigagriculture.RenderWorldLastEventHandler;
 
 public class CommonProxy {
 
