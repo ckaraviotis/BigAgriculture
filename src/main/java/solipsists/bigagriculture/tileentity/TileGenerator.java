@@ -38,15 +38,9 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 			if (energyStorage.receiveEnergy(rfpertick, true) > 0) {
 				energyStorage.receiveEnergy(rfpertick, false);
 				markDirty();
-			}
-				
+			}			
 			
-			if (counter % 40 == 0) {
-				counter = 1;
-				BigAgriculture.logger.log(Level.INFO, "Current Energy: " + getEnergyStored());			
-			}
-			
-			if (energyStorage.getEnergyStored() > rfpertick) {
+			if (energyStorage.getEnergyStored() >= rfpertick) {
 				
 				boolean provided = false;
 				for (EnumFacing f : EnumFacing.values()) {
@@ -79,8 +73,8 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 
 	@Override
 	public int receiveEnergy(int maxReceive, boolean simulate) {
-		//return 0;
-		return energyStorage.receiveEnergy(maxReceive, simulate);
+		return 0;
+		//return energyStorage.receiveEnergy(maxReceive, simulate);
 	}
 
 	@Override
@@ -105,7 +99,7 @@ public class TileGenerator extends TileEntity implements ITickable, IEnergyStora
 
 	@Override
 	public boolean canReceive() {
-		return true;
+		return false;
 	}
 	
 	@Override
