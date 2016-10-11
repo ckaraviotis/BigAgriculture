@@ -1,9 +1,11 @@
 package solipsists.bigagriculture.tileentity;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraftforge.energy.CapabilityEnergy;
 import org.apache.logging.log4j.Level;
 import solipsists.bigagriculture.BigAgriculture;
 
@@ -30,13 +32,33 @@ public class TileCapacitor extends TileInventoryHandler implements ITickable {
 
 	@Override
 	public void update() {
+        // Send energy to sides
         this.push(TRANSFER);
+
+        // Send energy to items
+        sendEnergyToItems();
+
+        // Fag for Update!
         markDirty();
 
         if (!worldObj.isRemote) {
             IBlockState state = this.worldObj.getBlockState(pos);
             final int flags = 3;
             this.worldObj.notifyBlockUpdate(pos, state, state, flags);
+        }
+    }
+
+    private void sendEnergyToItems() {
+        for (int i = 0; i < itemStackHandler.getSlots(); i++) {
+            ItemStack inputStack = itemStackHandler.getStackInSlot(i);
+
+            if (inputStack != null && inputStack.hasCapability(CapabilityEnergy.ENERGY, null)) {
+                int simExtract = this.extractEnergy(TRANSFER, true);
+                int simReceive = inputStack.getCapability(CapabilityEnergy.ENERGY, null).receiveEnergy(simExtract, true);
+                if (simExtract > 0 && simReceive > 0) {
+                    inputStack.getCapability(CapabilityEnergy.ENERGY, null).receiveEnergy(this.extractEnergy(TRANSFER, false), false);
+                }
+            }
         }
     }
 
