@@ -9,4 +9,8 @@ public class TileMultiblock extends TileInventoryHandler {
         super(0);
     }
 
+    public TileMultiblock(int slots) {
+        super(slots);
+    }
+
 }

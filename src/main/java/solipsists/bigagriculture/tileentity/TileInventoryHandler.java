@@ -10,13 +10,12 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class TileInventoryHandler extends TileEnergyGeneric implements ICapabilityProvider {
 
-    private ItemStackHandler itemStackHandler;
+    public ItemStackHandler itemStackHandler;
+    public int SLOTS;
 
     public TileInventoryHandler(int slots) {
         this(slots, 0);
     }
-
-    ;
 
     public TileInventoryHandler(int slots, int capacity) {
         this(slots, capacity, capacity);
@@ -28,6 +27,8 @@ public class TileInventoryHandler extends TileEnergyGeneric implements ICapabili
 
     public TileInventoryHandler(int slots, int capacity, int maxReceive, int maxExtract) {
         super(capacity, maxReceive, maxExtract);
+        this.SLOTS = slots;
+
         itemStackHandler = new ItemStackHandler(slots) {
             @Override
             protected void onContentsChanged(int slot) {

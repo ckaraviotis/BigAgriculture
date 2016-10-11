@@ -6,9 +6,9 @@ import solipsists.bigagriculture.BigAgriculture;
 
 public class TileCapacitor extends TileInventoryHandler implements ITickable {
 
+    public static final int SLOTS = 4;
     private static final int CAPACITY = 1000000;
     private static final int TRANSFER = 1024;
-    private static final int SLOTS = 4;
 
     public TileCapacitor() {
         super(SLOTS, CAPACITY, TRANSFER);

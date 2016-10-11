@@ -33,7 +33,7 @@ public class ContainerGeneric extends Container {
         // Slots for the main inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                int x = 9 + col * 18;
+                int x = 10 + col * 18;
                 int y = row * 18 + 70;
                 this.addSlotToContainer(new Slot(playerInventory, col + row * 9 + 10, x, y));
             }
@@ -41,7 +41,7 @@ public class ContainerGeneric extends Container {
 
         // Slots for the hotbar
         for (int row = 0; row < 9; ++row) {
-            int x = 9 + row * 18;
+            int x = 10 + row * 18;
             int y = 58 + 70;
             this.addSlotToContainer(new Slot(playerInventory, row, x, y));
         }
@@ -57,21 +57,28 @@ public class ContainerGeneric extends Container {
             ItemStack current = slot.getStack();
             previous = current.copy();
 
-            // TODO: Re-implement stack merging
             /*
-            if (index < TileController.SLOTS) {
-                if (!this.mergeItemStack(current, TileController.SLOTS, this.inventorySlots.size(), true)) {
+                0- 26 player inventory
+                27-35 player hotbar
+                36+   TE storage
+             */
+            int teMin = 36;
+            // Why does mergeItemStack INCLUDE from but EXCLUDE to??
+            int teMax = teMin + ((TileInventoryHandler) te).SLOTS;
+            if (index >= teMin) {
+                if (!this.mergeItemStack(current, 0, teMin, false))
                     return null;
-                }
-            } else if (!this.mergeItemStack(current, 0, TileController.SLOTS, false)) {
-                return null;
+            } else {
+                if (!this.mergeItemStack(current, teMin, teMax, false))
+                    return null;
             }
-            */
+
 
             if (current.stackSize == 0)
                 slot.putStack(null);
             else
                 slot.onSlotChanged();
+
 
             if (current.stackSize == previous.stackSize)
                 return null;
