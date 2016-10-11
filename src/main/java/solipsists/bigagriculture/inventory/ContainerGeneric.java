@@ -9,8 +9,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import solipsists.bigagriculture.tileentity.TileController;
-import solipsists.bigagriculture.tileentity.TileMultiblock;
+import solipsists.bigagriculture.tileentity.TileInventoryHandler;
 
 import javax.annotation.Nullable;
 
@@ -51,35 +50,40 @@ public class ContainerGeneric extends Container {
     @Nullable
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemstack = null;
+        ItemStack previous = null;
         Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
+            ItemStack current = slot.getStack();
+            previous = current.copy();
 
+            // TODO: Re-implement stack merging
+            /*
             if (index < TileController.SLOTS) {
-                if (!this.mergeItemStack(itemstack1, TileController.SLOTS, this.inventorySlots.size(), true)) {
+                if (!this.mergeItemStack(current, TileController.SLOTS, this.inventorySlots.size(), true)) {
                     return null;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, TileController.SLOTS, false)) {
+            } else if (!this.mergeItemStack(current, 0, TileController.SLOTS, false)) {
                 return null;
             }
+            */
 
-            if (itemstack1.stackSize == 0) {
+            if (current.stackSize == 0)
                 slot.putStack(null);
-            } else {
+            else
                 slot.onSlotChanged();
-            }
-        }
 
-        return itemstack;
+            if (current.stackSize == previous.stackSize)
+                return null;
+            slot.onPickupFromSlot(playerIn, current);
+        }
+        return previous;
     }
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        if (te instanceof TileMultiblock)
-            return ((TileMultiblock) te).canInteractWith(playerIn);
+        if (te instanceof TileInventoryHandler)
+            return ((TileInventoryHandler) te).canInteractWith(playerIn);
         return false;
     }
 }

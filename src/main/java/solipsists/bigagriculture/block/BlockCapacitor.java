@@ -23,6 +23,8 @@ import solipsists.bigagriculture.tileentity.TileCapacitor;
 
 public class BlockCapacitor extends BlockGenericBA implements ITileEntityProvider {
 
+    public static final int GUI_ID = 2;
+
 	public BlockCapacitor() {
 		super(Material.ROCK);
 				
@@ -41,14 +43,15 @@ public class BlockCapacitor extends BlockGenericBA implements ITileEntityProvide
 		if (worldIn.isRemote) {
 			return true;
 		}
-		
-		TileEntity te = this.getTE(worldIn, pos);
+
+		/*
+        TileEntity te = this.getTE(worldIn, pos);
 		if (te != null) {
 			((TileCapacitor) te).getStatus();
 		}
-		
-		//playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
-		return true;
+		*/
+        playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+        return true;
 	}
 		
 	@SideOnly(Side.CLIENT)
