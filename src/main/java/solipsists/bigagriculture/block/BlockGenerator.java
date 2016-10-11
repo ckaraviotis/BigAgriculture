@@ -1,6 +1,5 @@
 package solipsists.bigagriculture.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -15,10 +14,9 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.BigAgriculture;
-import solipsists.bigagriculture.tileentity.TileEnergyGeneric;
 import solipsists.bigagriculture.tileentity.TileGenerator;
 
-public class BlockGenerator extends Block implements ITileEntityProvider {
+public class BlockGenerator extends BlockGenericBA implements ITileEntityProvider {
 
 	public BlockGenerator() {
 		super(Material.ROCK);

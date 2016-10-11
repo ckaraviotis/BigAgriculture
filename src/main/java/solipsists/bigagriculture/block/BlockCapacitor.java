@@ -1,6 +1,5 @@
 package solipsists.bigagriculture.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -21,10 +20,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.tileentity.TileCapacitor;
-import solipsists.bigagriculture.tileentity.TileEnergyGeneric;
-import solipsists.bigagriculture.tileentity.TileGenerator;
 
-public class BlockCapacitor extends Block implements ITileEntityProvider {
+public class BlockCapacitor extends BlockGenericBA implements ITileEntityProvider {
 
 	public BlockCapacitor() {
 		super(Material.ROCK);
@@ -36,7 +33,6 @@ public class BlockCapacitor extends Block implements ITileEntityProvider {
 		GameRegistry.register(this);
 		GameRegistry.register(new ItemBlock(this), getRegistryName());
 		GameRegistry.registerTileEntity(TileCapacitor.class, BigAgriculture.MODID + "_capacitor");
-		//GameRegistry.registerTileEntity(TileEnergyGeneric.class, BigAgriculture.MODID + "_energyGeneric");
 	}
 	
 	@Override
