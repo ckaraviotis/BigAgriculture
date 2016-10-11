@@ -1,16 +1,6 @@
 package solipsists.bigagriculture.tileentity;
 
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockCrops;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.BlockFarmland;
-import net.minecraft.block.BlockGrass;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -22,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import solipsists.bigagriculture.ModBlocks;
@@ -29,29 +20,27 @@ import solipsists.bigagriculture.block.BlockFertilizer;
 import solipsists.bigagriculture.block.BlockIrrigatedFarmland;
 import solipsists.bigagriculture.multiblock.Multiblock;
 
-public class TileController extends TileMultiblock implements ITickable {
+import java.util.List;
+import java.util.Random;
 
-	private int radius;
-	public int tickCounter = 0;
-	private int operationInterval = 0;
+public class TileController extends TileMultiblock implements ITickable, ICapabilityProvider {
+
+    public static final int SLOTS = 10;
+    public int tickCounter = 0;
+    public boolean inventoryHasRoom = true;
+    public boolean isActive = false;    // is multiblock complete?
+    private int radius;
+    private int operationInterval = 0;
 	private Random rand = new Random();
-
-	public static final int SLOTS = 10;
-
 	private boolean hasIrrigator = false;
 	private boolean hasFertilizer = false;
 	private double fertilizerChance = 0;
 	private boolean hasUnderground = false; // Build multiblock beneath the crops?
 	private boolean hasInfinityStone = false;
 	private boolean hasVoidStone = false;
-
-	public boolean inventoryHasRoom = true;
-
 	private EntityPlayer owner;
-
 	// Multiblock vars
 	private int multiBlockRefresh = 1000;
-	public boolean isActive = false;	// is multiblock complete?
 	private Multiblock multiblock = new Multiblock();
 	
 	// Inventory slots
@@ -70,12 +59,8 @@ public class TileController extends TileMultiblock implements ITickable {
 		multiblock.highlight();
 	}
 
-	public boolean canInteractWith(EntityPlayer playerIn) {
-		// If we are too far away from this tile entity you cannot use it
-		return !isInvalid() && playerIn.getDistanceSq(pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
-	}
 
-	@Override
+    @Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
 		if (compound.hasKey("items")) {

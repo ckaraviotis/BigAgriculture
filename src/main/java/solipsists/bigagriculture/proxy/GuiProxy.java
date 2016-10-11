@@ -1,16 +1,13 @@
 package solipsists.bigagriculture.proxy;
 
-import org.apache.logging.log4j.Level;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
-import solipsists.bigagriculture.BigAgriculture;
-import solipsists.bigagriculture.gui.GuiTestContainer;
+import solipsists.bigagriculture.gui.GuiContainerController;
+import solipsists.bigagriculture.inventory.ContainerController;
 import solipsists.bigagriculture.tileentity.TileController;
-import solipsists.bigagriculture.util.TestContainer;
 
 public class GuiProxy implements IGuiHandler {
 
@@ -20,7 +17,7 @@ public class GuiProxy implements IGuiHandler {
 		TileEntity te = world.getTileEntity(pos);
 		
 		if (te instanceof TileController) {
-		    return new TestContainer(player.inventory, (TileController) te);
+			return new ContainerController(player.inventory, (TileController) te);
 		}
 		return null;
 	}
@@ -32,7 +29,7 @@ public class GuiProxy implements IGuiHandler {
 		
 		if (te instanceof TileController) {
 			TileController containerTileEntity = (TileController) te;
-		    return new GuiTestContainer(containerTileEntity, new TestContainer(player.inventory, containerTileEntity));
+			return new GuiContainerController(containerTileEntity, new ContainerController(player.inventory, containerTileEntity));
 		}
 		return null;
 	}

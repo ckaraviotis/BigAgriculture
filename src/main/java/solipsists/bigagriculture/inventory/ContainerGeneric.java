@@ -1,52 +1,40 @@
-package solipsists.bigagriculture.util;
-
-import javax.annotation.Nullable;
+package solipsists.bigagriculture.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
 import solipsists.bigagriculture.tileentity.TileController;
+import solipsists.bigagriculture.tileentity.TileMultiblock;
 
-public class TestContainer extends Container {
-	
-	private TileController te;
+import javax.annotation.Nullable;
 
-	public TestContainer (IInventory playerInventory, TileController te) {
-		this.te = te;
-		
-		addOwnSlots();
-		addPlayerSlots(playerInventory);
-	}
-	
-	private void addOwnSlots() {
-		IItemHandler itemHandler = this.te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-		
-		// Input slot
-		addSlotToContainer(new SlotItemHandler(itemHandler, 0, 82, 29));
-		
-		int x = 117;
-		int y = 11;
-		
-		for (int i = 1; i < itemHandler.getSlots(); i++) {
-			if (x > 153) {
-				x = 117;
-				y += 18;
-			}
-			addSlotToContainer(new SlotItemHandler(itemHandler, i, x, y));	
-			x += 18;
-		}
-	}
-	
-    private void addPlayerSlots(IInventory playerInventory) {
+public class ContainerGeneric extends Container {
+
+    private TileEntity te;
+
+    public ContainerGeneric(IInventory playerInventory, TileEntity te) {
+        this.te = te;
+        addPlayerSlots(playerInventory);
+    }
+
+    public IItemHandler getIItemHandler() {
+        if (te instanceof ICapabilityProvider)
+            return this.te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        return null;
+    }
+
+
+    protected void addPlayerSlots(IInventory playerInventory) {
         // Slots for the main inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                int x = 9 + col * 18;	
+                int x = 9 + col * 18;
                 int y = row * 18 + 70;
                 this.addSlotToContainer(new Slot(playerInventory, col + row * 9 + 10, x, y));
             }
@@ -90,7 +78,8 @@ public class TestContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        return te.canInteractWith(playerIn);
+        if (te instanceof TileMultiblock)
+            return ((TileMultiblock) te).canInteractWith(playerIn);
+        return false;
     }
-
 }
