@@ -1,6 +1,5 @@
 package solipsists.bigagriculture.tileentity;
 
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 
 /***
@@ -8,6 +7,5 @@ import net.minecraft.tileentity.TileEntity;
  */
 public class TileMultiblock extends TileEntity {
 
-	public static boolean CHECKED = false;
 	
 }
