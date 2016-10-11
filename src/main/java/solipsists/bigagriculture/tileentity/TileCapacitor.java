@@ -1,8 +1,13 @@
 package solipsists.bigagriculture.tileentity;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ITickable;
 import org.apache.logging.log4j.Level;
 import solipsists.bigagriculture.BigAgriculture;
+
+import javax.annotation.Nullable;
 
 public class TileCapacitor extends TileInventoryHandler implements ITickable {
 
@@ -26,5 +31,38 @@ public class TileCapacitor extends TileInventoryHandler implements ITickable {
 	@Override
 	public void update() {
         this.push(TRANSFER);
+        markDirty();
+
+        if (!worldObj.isRemote) {
+            IBlockState state = this.worldObj.getBlockState(pos);
+            final int flags = 3;
+            this.worldObj.notifyBlockUpdate(pos, state, state, flags);
+        }
     }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        NBTTagCompound updateTag = new NBTTagCompound();
+        writeToNBT(updateTag);
+        return updateTag;
+    }
+
+    @Nullable
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        NBTTagCompound updatePacket = getUpdateTag();
+        this.writeToNBT(updatePacket);
+        return new SPacketUpdateTileEntity(getPos(), getBlockMetadata(), updatePacket);
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.NetworkManager net, net.minecraft.network.play.server.SPacketUpdateTileEntity pkt) {
+        readFromNBT(pkt.getNbtCompound());
+    }
+
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        this.readFromNBT(tag);
+    }
+
 }

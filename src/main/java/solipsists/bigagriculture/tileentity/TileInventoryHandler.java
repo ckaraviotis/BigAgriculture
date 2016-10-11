@@ -40,6 +40,7 @@ public class TileInventoryHandler extends TileEnergyGeneric implements ICapabili
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
+
         if (compound.hasKey("items")) {
             itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("items"));
         }
@@ -48,6 +49,7 @@ public class TileInventoryHandler extends TileEnergyGeneric implements ICapabili
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
+
         compound.setTag("items", itemStackHandler.serializeNBT());
         return compound;
     }

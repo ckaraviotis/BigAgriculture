@@ -16,6 +16,8 @@ import solipsists.bigagriculture.tileentity.TileController;
 
 public class GuiProxy implements IGuiHandler {
 
+    private ContainerCapacitor cc;
+
 	@Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		BlockPos pos = new BlockPos(x, y, z);
@@ -24,6 +26,7 @@ public class GuiProxy implements IGuiHandler {
         if (ID == BlockController.GUI_ID) {
             return new ContainerController(player.inventory, (TileController) te);
 		} else if (ID == BlockCapacitor.GUI_ID) {
+
             return new ContainerCapacitor(player.inventory, (TileCapacitor) te);
         }
         return null;
@@ -38,7 +41,7 @@ public class GuiProxy implements IGuiHandler {
             TileController containerTileEntity = (TileController) te;
 			return new GuiContainerController(containerTileEntity, new ContainerController(player.inventory, containerTileEntity));
         } else if (ID == BlockCapacitor.GUI_ID) {
-            TileCapacitor capacitor = (TileCapacitor) te;
+            TileCapacitor capacitor = (TileCapacitor) world.getTileEntity(pos);
             return new GuiContainerCapacitor(capacitor, new ContainerCapacitor(player.inventory, capacitor));
         }
 		return null;

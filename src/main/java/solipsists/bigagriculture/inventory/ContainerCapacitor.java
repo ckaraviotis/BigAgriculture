@@ -7,9 +7,12 @@ import solipsists.bigagriculture.tileentity.TileCapacitor;
 
 public class ContainerCapacitor extends ContainerGeneric {
 
+    protected TileCapacitor tc;
+
     public ContainerCapacitor(IInventory playerInventory, TileCapacitor te) {
         super(playerInventory, te);
 
+        tc = te;
         addOwnSlots();
         this.addPlayerSlots(playerInventory);
     }

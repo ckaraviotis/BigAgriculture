@@ -1,6 +1,7 @@
 package solipsists.bigagriculture.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -11,7 +12,7 @@ import solipsists.bigagriculture.util.EnergyHandler;
 
 public class TileEnergyGeneric extends TileEntity implements IEnergyStorage, ICapabilityProvider {
 
-	private EnergyHandler energy;
+    protected EnergyHandler energy;
 
 	public TileEnergyGeneric() {
 		this(0);
@@ -30,28 +31,30 @@ public class TileEnergyGeneric extends TileEntity implements IEnergyStorage, ICa
 	}
 
 	public void push(int transfer) {
-		for (EnumFacing f : EnumFacing.values()) {
-			if (this.getEnergyStored() >= transfer) {
-				TileEntity te = worldObj.getTileEntity(getPos().offset(f));
+        if (!worldObj.isRemote) {
+            for (EnumFacing f : EnumFacing.values()) {
+                if (this.getEnergyStored() >= transfer) {
+                    TileEntity te = worldObj.getTileEntity(getPos().offset(f));
 
-				if (te != null && te.hasCapability(CapabilityEnergy.ENERGY, f)) {
+                    if (te != null && te.hasCapability(CapabilityEnergy.ENERGY, f)) {
 
-					// Assume true unless otherwise specified
-					boolean canReceive = true;
-					if (te instanceof TileEnergyGeneric)
-						canReceive = ((TileEnergyGeneric) te).canReceive();
+                        // Assume true unless otherwise specified
+                        boolean canReceive = true;
+                        if (te instanceof TileEnergyGeneric)
+                            canReceive = ((TileEnergyGeneric) te).canReceive();
 
-					int simExtract = this.extractEnergy(transfer, true);
-					int simReceive = te.getCapability(CapabilityEnergy.ENERGY, f.getOpposite()).receiveEnergy(simExtract, true);
-					if (canReceive && simExtract > 0 && simReceive > 0) {
-						te.getCapability(CapabilityEnergy.ENERGY, f.getOpposite()).receiveEnergy(this.extractEnergy(transfer, false), false);
-						te.markDirty();
-						markDirty();
-					}
+                        int simExtract = this.extractEnergy(transfer, true);
+                        int simReceive = te.getCapability(CapabilityEnergy.ENERGY, f.getOpposite()).receiveEnergy(simExtract, true);
+                        if (canReceive && simExtract > 0 && simReceive > 0) {
+                            te.getCapability(CapabilityEnergy.ENERGY, f.getOpposite()).receiveEnergy(this.extractEnergy(transfer, false), false);
 
-				}
+                        }
+
+                    }
+                }
 			}
-		}
+            markDirty();
+        }
 	}
 
 	public void generate(int energy) {
@@ -67,15 +70,20 @@ public class TileEnergyGeneric extends TileEntity implements IEnergyStorage, ICa
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		int rf = compound.getInteger("energy");
-		energy.setEnergy(rf);
-	}
+
+        if (compound.hasKey("energy")) {
+            int rf = compound.getInteger("energy");
+            energy.setEnergy(rf);
+        }
+    }
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		super.writeToNBT(compound);
-		compound.setInteger("energy", energy.getEnergyStored());
-		return compound;
+
+        compound.setTag("energy", new NBTTagInt(energy.getEnergyStored()));
+        //compound.setInteger("energy", energy.getEnergyStored());
+        return compound;
 	}
 
 	@Override

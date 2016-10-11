@@ -44,12 +44,12 @@ public class BlockCapacitor extends BlockGenericBA implements ITileEntityProvide
 			return true;
 		}
 
-		/*
+
         TileEntity te = this.getTE(worldIn, pos);
-		if (te != null) {
-			((TileCapacitor) te).getStatus();
+        if (te != null && false) {
+            ((TileCapacitor) te).getStatus();
 		}
-		*/
+
         playerIn.openGui(BigAgriculture.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
         return true;
 	}
