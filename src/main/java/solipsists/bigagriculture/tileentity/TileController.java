@@ -143,8 +143,8 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 		boolean isDirt = b instanceof BlockDirt || b instanceof BlockGrass;
 	
 		// Replace vanilla farmland with perma-irrigated
-		if (hasIrrigator && !(b instanceof BlockIrrigatedFarmland)) {
-			IBlockState irrigated = ModBlocks.irrigatedFarmland.getDefaultState();
+        if (hasIrrigator && !(b instanceof BlockIrrigatedFarmland) && (isDirt || b instanceof BlockFarmland)) {
+            IBlockState irrigated = ModBlocks.irrigatedFarmland.getDefaultState();
 			worldObj.setBlockState(pos, irrigated, 2);	
 		}
 		// Irrigator has been removed, reset to farmland
@@ -282,13 +282,15 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 	 * Destroy any Irrigated Farmland blocks
 	 */
 	public void saltTheEarth() {
-		
 		IBlockState state = Blocks.FARMLAND.getDefaultState().withProperty(BlockFarmland.MOISTURE, 7);
 		
 		if (multiblock.getSoil().size() > 0) {
 			for (BlockPos pos : multiblock.getSoil()) {
-				worldObj.setBlockState(pos, state);
-			}
+                Block ground = worldObj.getBlockState(pos).getBlock();
+
+                if (ground instanceof BlockIrrigatedFarmland)
+                    worldObj.setBlockState(pos, state);
+            }
 		}
 		
 	}
