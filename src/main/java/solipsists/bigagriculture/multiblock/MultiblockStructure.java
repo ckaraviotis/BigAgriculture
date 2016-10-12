@@ -13,39 +13,33 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class MultiblockStructure {
-	
-	private HashMap<String, MultiblockEntry> structure = new HashMap();	
 
-	// The bounds of the multiblock, with 1block padding on each facing except .down()
-	private BlockPos boundsMin;
+    private HashMap<String, MultiblockEntry> structure = new HashMap<String, MultiblockEntry>();
+
+    // The bounds of the multiblock
+    private BlockPos boundsMin;
 	private BlockPos boundsMax;
-
-	// The actual bounds, ie no padding.
-	private BlockPos actualBoundsMin;
-	private BlockPos actualBoundsMax;
-
-    private World world;
 
     /**
 	 * Render around all blocks contained in structure 
 	 */
-	public void highlight() {		
-		Set<BlockPos> set = new HashSet<BlockPos>();
-		
-		for (Iterator<BlockPos> it = BlockPos.getAllInBox(actualBoundsMin, actualBoundsMax).iterator(); it.hasNext();) {
-			set.add(it.next());
+    public void highlight() {
+        Set<BlockPos> set = new HashSet<BlockPos>();
+
+        for (Iterator<BlockPos> it = BlockPos.getAllInBox(boundsMin, boundsMax).iterator(); it.hasNext(); ) {
+            set.add(it.next());
 		}
 		
 		BigAgriculture.instance.clientInfo.highlightBlocks(set, System.currentTimeMillis() + 10000);
     }
 
     public BlockPos findYourCenter() {
-        if (actualBoundsMin == null || actualBoundsMax == null)
+        if (boundsMin == null || boundsMax == null)
             return null;
 
-        double x = (actualBoundsMin.getX() + actualBoundsMax.getX()) / 2;
-        double z = (actualBoundsMin.getZ() + actualBoundsMax.getZ()) / 2;
-        double y = actualBoundsMin.getY();
+        double x = (boundsMin.getX() + boundsMax.getX()) / 2;
+        double z = (boundsMin.getZ() + boundsMax.getZ()) / 2;
+        double y = boundsMin.getY();
 
         BlockPos center = new BlockPos(x, y, z);
         return center;
@@ -65,45 +59,30 @@ public class MultiblockStructure {
 		}		
 		return false;
 	}
-	
-	/**
-	 * Return true if the ACTUAL bounds contain the given BlockPos.
-	 * @param pos
-	 * @return
-	 */
-	public boolean actualBoundsContain(BlockPos pos) {
-		for(Iterator<BlockPos> it = BlockPos.getAllInBox(actualBoundsMin, actualBoundsMax).iterator(); it.hasNext();) {
-			BlockPos current = it.next();
-			if (pos.equals(current)) {
-				return true;
-			}
-		}		
-		return false;
-	}
-	
+
 	/**
 	 * The number of blocks in the structure
-	 * @return
-	 */
+     * @return size of the structure
+     */
 	private int size() {
 		return structure.size();
 	}
 		
 	/**
 	 * Extend the bounds of the structure to include the given BlockPos
-	 * @param pos
-	 */
+     * @param pos The position to add to the bounds
+     */
 	private void adjustBounds(BlockPos pos) {		
 		
 		if (boundsMin == null) {
 			boundsMin = pos;
-			actualBoundsMin = pos;
-		}
+            boundsMin = pos;
+        }
 		
 		if (boundsMax == null) {
 			boundsMax = pos;
-			actualBoundsMax = pos;
-		}
+            boundsMax = pos;
+        }
 		
 		// Not in bounds! Re-create catching new coords
 		if (!boundsContain(pos)) {
@@ -140,9 +119,6 @@ public class MultiblockStructure {
 			
 			boundsMin = new BlockPos(minX, minY, minZ);
 			boundsMax = new BlockPos(maxX, maxY, maxZ);
-			
-			actualBoundsMin = boundsMin.add(1,0,1);
-			actualBoundsMax = boundsMax.add(-1,-1,-1);
 		}
 	}
 	
@@ -151,10 +127,8 @@ public class MultiblockStructure {
 	 * @param pos The BlockPos to add to the structure.
 	 * @param type The Type of the multiblock.
 	 */
-	public void add(BlockPos pos, Multiblock.TYPE type) {		
-		adjustBounds(pos);			
-		
-		MultiblockEntry m = new MultiblockEntry(pos);
+    public void add(BlockPos pos, Multiblock.TYPE type) {
+        MultiblockEntry m = new MultiblockEntry(pos);
 		m.type = type;
 		MultiblockEntry old = structure.put(key(pos), m);
 	}	
@@ -166,13 +140,15 @@ public class MultiblockStructure {
 	public void remove(BlockPos pos) {
 		structure.remove(key(pos));
 	}
-	
+
 	/**
 	 * Reset the structure.
 	 */
 	public void clear() {
 		structure.clear();
-	}
+        boundsMin = null;
+        boundsMax = null;
+    }
 	
 	/**
 	 * Return the checked flag for the given BlockPos
@@ -230,14 +206,34 @@ public class MultiblockStructure {
 	public boolean isValid() {
         // Unchecked block in structure
         for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
-			if (pair.getValue().checked == false)
-				return false;
+            if (!pair.getValue().checked)
+                return false;
 		}
 		
 		return true;
 	}
-	
-	/**
+
+    /**
+     * Remove invalid blocks from the structure.
+     */
+    public void pruneInvalid() {
+        HashSet<String> keysToRemove = new HashSet<String>();
+
+        for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+            if (!pair.getValue().valid)
+                keysToRemove.add(pair.getKey());
+        }
+
+        for (String key : keysToRemove) {
+            structure.remove(key);
+        }
+
+        for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+            adjustBounds(pair.getValue().pos);
+        }
+    }
+
+    /**
 	 * Generate the key for the structure map.
 	 * @param pos
 	 * @return
@@ -248,17 +244,15 @@ public class MultiblockStructure {
 	
 	/**
 	 * Get the operating radius of the multiblock, after counting Expanders.
-	 * @param world
-	 * @return
-	 */
-	public int getMultiblockRadius(World world){ //, int radius) {
-        this.world = world;
-
+     * @param world The world
+     * @return The radius of the multiblock
+     */
+    public int getMultiblockRadius(World world) {
         // Work out starting radius based on multiblock base size
-        double xdif = Math.ceil(((double) actualBoundsMax.getX() - (double) actualBoundsMin.getX()) / 2);
-        double zdif = Math.ceil(((double) actualBoundsMax.getZ() - (double) actualBoundsMin.getZ()) / 2);
+        double xDiff = Math.ceil(((double) boundsMax.getX() - (double) boundsMin.getX()) / 2);
+        double zDiff = Math.ceil(((double) boundsMax.getZ() - (double) boundsMin.getZ()) / 2);
 
-        int rad = 1 + (int) Math.max(xdif, zdif);
+        int rad = 1 + (int) Math.max(xDiff, zDiff);
 
         for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
 			Block b = world.getBlockState(pair.getValue().pos).getBlock();
@@ -272,19 +266,19 @@ public class MultiblockStructure {
 	
 	/**
 	 * Get the number of blocks of a specific type in the structure.
-	 * @param type
-	 * @return
-	 */
+     * @param type The type of block to look for
+     * @return The number of blocks found
+     */
 	public int getBlocksOfType(Multiblock.TYPE type) {
-		int b = 0;
-		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+        int blocksOfType = 0;
+        for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
 			MultiblockEntry entry = pair.getValue();
 			
 			if (entry.type == type) {
-				b += 1;
-			}
+                blocksOfType += 1;
+            }
 		}
-		return b;
-	}
+        return blocksOfType;
+    }
 
 }

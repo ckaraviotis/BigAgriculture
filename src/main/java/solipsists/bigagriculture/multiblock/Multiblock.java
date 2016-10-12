@@ -2,15 +2,9 @@ package solipsists.bigagriculture.multiblock;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.Level;
-import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.block.BlockMultiblock;
 
 import java.util.*;
@@ -27,27 +21,6 @@ public class Multiblock {
     private BlockPos center;
     private Integer RADIUS;
 	
-	/**
-	 * Debug method. Places woolen blocks at the corners of the farming area, one block up.
-	 * TODO remove
-	 * @param world
-	 */
-	private void placePlantCorners(World world) {
-		BlockPos topLeft  = controller.add(-RADIUS, 1, -RADIUS);
-		BlockPos topRight = controller.add(RADIUS, 1, -RADIUS);
-		BlockPos botLeft  = controller.add(-RADIUS, 1, RADIUS);
-        BlockPos botRight = controller.add(RADIUS, 1, RADIUS);
-
-        PropertyEnum color = PropertyEnum.create("color", EnumDyeColor.class);
-        IBlockState w = Blocks.WOOL.getDefaultState().withProperty(color, EnumDyeColor.PINK);
-
-		world.setBlockState(topLeft, w);
-		world.setBlockState(topRight, w);
-		world.setBlockState(botLeft, w);
-		world.setBlockState(botRight, w);
-
-	}
-
 	public Set<BlockPos> getSoil() {
 		Set<BlockPos> set = new HashSet<BlockPos>();
 
@@ -107,7 +80,7 @@ public class Multiblock {
 					current = current.add(down);
 				}
 			}
-		} while (structure.actualBoundsContain(current));
+        } while (structure.boundsContain(current));
 
 		return current;
 	}
@@ -119,6 +92,18 @@ public class Multiblock {
 	public boolean isValid() {
 		return structure.isValid();
 	}
+
+    /**
+     * Call the recursive build, then remove invalid blocks
+     * @param world
+     * @param current
+     * @param clear
+     */
+    public void build(World world, BlockPos current, boolean clear) {
+        buildMultiblock(world, current, clear);
+        structure.pruneInvalid();
+        RADIUS = structure.getMultiblockRadius(world);
+    }
 
     /**
      * Recursively build a multiblock structure, starting from a BlockPos.
@@ -135,7 +120,8 @@ public class Multiblock {
 		// TODO This implementation sucks.
 		neighbours.add( current );
 		neighbours.add( current.up() );
-		neighbours.add( current.north() );
+        neighbours.add(current.down());
+        neighbours.add( current.north() );
 		neighbours.add( current.south() );
 		neighbours.add( current.east() );
 		neighbours.add( current.west() );
@@ -151,7 +137,10 @@ public class Multiblock {
 			}
 
 			if (!structure.contains(neighbour)) {
-				structure.add(neighbour, type);
+                // Add and flag as invalid and unchecked.
+                structure.add(neighbour, type);
+                structure.setChecked(neighbour, true);
+                structure.setValid(neighbour, false);
 
                 boolean isValidBlock = b instanceof BlockMultiblock;
                 boolean isAir = world.isAirBlock(neighbour);
@@ -160,9 +149,7 @@ public class Multiblock {
 				if(!isValidBlock && !isAir && !isCrop) {
 					structure.setValid(neighbour, false);
 					structure.setChecked(neighbour, true);
-					BigAgriculture.logger.log(Level.INFO, "Block "+ b.getUnlocalizedName() + " marked as invalid.");
 				}
-
 				if (isValidBlock) {
 					structure.setValid(neighbour, true);
                     structure.setChecked(neighbour, true);
@@ -170,12 +157,11 @@ public class Multiblock {
 					buildMultiblock(world, neighbour, false);
 				}
 
-                structure.setChecked(neighbour, true);
             }
         }
 
-		RADIUS = structure.getMultiblockRadius(world);
-	}
+
+    }
 	
 	/**
 	 * Get the radius of the multiblock accounting for expanders.

@@ -242,8 +242,8 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 				multiBlockRefresh = 0;
 				
 				// Check we have a valid MB, and set the controller active as required				
-				multiblock.buildMultiblock(worldObj, pos, true);
-                BlockPos c = multiblock.findYourCenter();
+				multiblock.build(worldObj, pos, true);
+				BlockPos c = multiblock.findYourCenter();
                 boolean multiblockValid = multiblock.isValid();
 				
 				if (!multiblockValid && owner != null)
