@@ -25,7 +25,8 @@ public class Multiblock {
 	
 	private BlockPos current;	
 	private BlockPos controller;
-	private Integer RADIUS;
+    private BlockPos center;
+    private Integer RADIUS;
 	
 	/**
 	 * Debug method. Places woolen blocks at the corners of the farming area, one block up.
@@ -45,8 +46,9 @@ public class Multiblock {
 		world.setBlockState(topRight, w);
 		world.setBlockState(botLeft, w);
 		world.setBlockState(botRight, w);
+
 	}
-	
+
 	public Set<BlockPos> getSoil() {
 		Set<BlockPos> set = new HashSet<BlockPos>();
 
@@ -63,18 +65,24 @@ public class Multiblock {
 
 		return set;
 	}
-	
-	/**
+
+    public BlockPos findYourCenter() {
+        return center = structure.findYourCenter();
+    }
+
+    /**
 	 * Return the next BlockPos in the operating area for the Multiblock,
 	 * i.e. the soil to perform an action on.
 	 * @return
 	 */
 	public BlockPos getNext() {
+        if (center == null)
+            center = controller;
 
-		BlockPos topLeft  = controller.add(-RADIUS, 0, -RADIUS);
-		BlockPos topRight = controller.add(RADIUS, 0, -RADIUS);
-		BlockPos botLeft  = controller.add(-RADIUS, 0, RADIUS);
-        BlockPos botRight = controller.add(RADIUS, 0, RADIUS);
+        BlockPos topLeft = center.add(-RADIUS, 0, -RADIUS);
+        BlockPos topRight = center.add(RADIUS, 0, -RADIUS);
+        BlockPos botLeft = center.add(-RADIUS, 0, RADIUS);
+        BlockPos botRight = center.add(RADIUS, 0, RADIUS);
 
 		if (current == null) {
 			current = topLeft;

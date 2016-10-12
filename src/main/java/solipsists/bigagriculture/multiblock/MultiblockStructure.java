@@ -1,18 +1,16 @@
 package solipsists.bigagriculture.multiblock;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.block.BlockExpander;
 import solipsists.bigagriculture.tileentity.TileExpander;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class MultiblockStructure {
 	
@@ -25,8 +23,10 @@ public class MultiblockStructure {
 	// The actual bounds, ie no padding.
 	private BlockPos actualBoundsMin;
 	private BlockPos actualBoundsMax;
-	
-	/**
+
+    private World world;
+
+    /**
 	 * Render around all blocks contained in structure 
 	 */
 	public void highlight() {		
@@ -37,7 +37,19 @@ public class MultiblockStructure {
 		}
 		
 		BigAgriculture.instance.clientInfo.highlightBlocks(set, System.currentTimeMillis() + 10000);
-	}
+    }
+
+    public BlockPos findYourCenter() {
+        if (actualBoundsMin == null || actualBoundsMax == null)
+            return null;
+
+        double x = (actualBoundsMin.getX() + actualBoundsMax.getX()) / 2;
+        double z = (actualBoundsMin.getZ() + actualBoundsMax.getZ()) / 2;
+        double y = actualBoundsMin.getY();
+
+        BlockPos center = new BlockPos(x, y, z);
+        return center;
+    }
 	 
 	/**
 	 * Return true if the bounds contain the given BlockPos
@@ -216,7 +228,8 @@ public class MultiblockStructure {
 	 * @return
 	 */
 	public boolean isValid() {
-		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+        // Unchecked block in structure
+        for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
 			if (pair.getValue().checked == false)
 				return false;
 		}
@@ -239,9 +252,15 @@ public class MultiblockStructure {
 	 * @return
 	 */
 	public int getMultiblockRadius(World world){ //, int radius) {
-		int rad = 1;
-		
-		for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+        this.world = world;
+
+        // Work out starting radius based on multiblock base size
+        double xdif = Math.ceil(((double) actualBoundsMax.getX() - (double) actualBoundsMin.getX()) / 2);
+        double zdif = Math.ceil(((double) actualBoundsMax.getZ() - (double) actualBoundsMin.getZ()) / 2);
+
+        int rad = 1 + (int) Math.max(xdif, zdif);
+
+        for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
 			Block b = world.getBlockState(pair.getValue().pos).getBlock();
 			if (b instanceof BlockExpander) {
 				TileExpander t = (TileExpander)world.getTileEntity(pair.getValue().pos);

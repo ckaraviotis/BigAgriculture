@@ -243,7 +243,8 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 				
 				// Check we have a valid MB, and set the controller active as required				
 				multiblock.buildMultiblock(worldObj, pos, true);
-				boolean multiblockValid = multiblock.isValid();
+                BlockPos c = multiblock.findYourCenter();
+                boolean multiblockValid = multiblock.isValid();
 				
 				if (!multiblockValid && owner != null)
 					owner.addChatComponentMessage(new TextComponentString("Multiblock structure is invalid."));
