@@ -12,7 +12,6 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import solipsists.bigagriculture.BigAgriculture;
 import solipsists.bigagriculture.block.BlockMultiblock;
-import solipsists.bigagriculture.tileentity.TileMultiblock;
 
 import java.util.*;
 
@@ -166,8 +165,6 @@ public class Multiblock {
 
 				if (isValidBlock) {
 					structure.setValid(neighbour, true);
-
-                    TileMultiblock t = (TileMultiblock) world.getTileEntity(neighbour);
                     structure.setChecked(neighbour, true);
 
 					buildMultiblock(world, neighbour, false);
