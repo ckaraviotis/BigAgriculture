@@ -24,9 +24,9 @@ public class Multiblock {
 	public Set<BlockPos> getSoil() {
 		Set<BlockPos> set = new HashSet<BlockPos>();
 
-		if (controller != null) {
-			BlockPos topLeft  = controller.add(-RADIUS, -1, -RADIUS);
-			BlockPos botRight = controller.add(RADIUS, -1, RADIUS);
+        if (center != null) {
+            BlockPos topLeft = center.add(-RADIUS, -1, -RADIUS);
+            BlockPos botRight = center.add(RADIUS, -1, RADIUS);
 
 
             for (Iterator<BlockPos> it = BlockPos.getAllInBox(topLeft, botRight).iterator(); it.hasNext(); ) {
@@ -196,7 +196,8 @@ public class Multiblock {
         FERTILIZER,
         INFINITY_STONE,
         IRRIGATOR,
-        VOID_STONE
+        VOID_STONE,
+        ILLUMINATOR
     }
 
 }
