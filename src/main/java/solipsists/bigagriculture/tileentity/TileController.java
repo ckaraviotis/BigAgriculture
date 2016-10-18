@@ -28,12 +28,15 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
     private int radius;
     private int operationInterval = 0;
 	private Random rand = new Random();
-	private boolean hasIrrigator = false;
+
+    // Upgrades
+    private boolean hasIrrigator = false;
 	private boolean hasFertilizer = false;
 	private double fertilizerChance = 0;
-	private boolean hasUnderground = false; // Build multiblock beneath the crops?
 	private boolean hasInfinityStone = false;
 	private boolean hasVoidStone = false;
+    private boolean hasIlluminator = false;
+
 	private EntityPlayer owner;
 	// Multiblock vars
 	private int multiBlockRefresh = 1000;
@@ -232,6 +235,15 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 		}
 	}
 
+    private void illuminate(BlockPos pos) {
+        Blocks.TORCH.getDefaultState();
+        IBlockState glow = ModBlocks.glowing_air.getDefaultState();
+        BlockPos above = pos.add(0, 1, 0);
+
+        //if (worldObj.isAirBlock(pos))
+        worldObj.setBlockState(above, glow);
+    }
+
 	@Override
 	public void update() {
 		if(!this.worldObj.isRemote) {
@@ -255,7 +267,8 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 				hasInfinityStone = multiblock.getBlocksOfType(Multiblock.TYPE.INFINITY_STONE) > 0;
 				hasIrrigator = multiblock.getBlocksOfType(Multiblock.TYPE.IRRIGATOR) > 0;
 				hasVoidStone = multiblock.getBlocksOfType(Multiblock.TYPE.VOID_STONE) > 0;
-			}
+                hasIlluminator = multiblock.getBlocksOfType(Multiblock.TYPE.ILLUMINATOR) > 0;
+            }
 
 			if (tickCounter > operationInterval) {
 				
@@ -271,7 +284,11 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 					if (!isInventoryFull()) {
 						harvest(current);						
 					}
-				}				
+
+                    if (hasIlluminator) {
+                        illuminate(current);
+                    }
+                }
 				tickCounter = 0;
 			}
 
@@ -295,6 +312,23 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 		}
 		
 	}
+
+    /***
+     * Destroy any Iglowing air blocks
+     */
+    public void lightsOut() {
+        if (multiblock.getSoil().size() > 0) {
+            for (BlockPos pos : multiblock.getSoil()) {
+                BlockPos glow = pos.add(0, 2, 0);
+                Block glowBlock = worldObj.getBlockState(glow).getBlock();
+
+                if (glowBlock == ModBlocks.glowing_air) {
+                    // Outstanding bug #6
+                    worldObj.setBlockToAir(glow);
+                }
+            }
+        }
+    }
 
 
 }

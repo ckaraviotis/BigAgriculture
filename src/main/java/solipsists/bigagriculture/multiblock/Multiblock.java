@@ -43,6 +43,24 @@ public class Multiblock {
     }
 
     /**
+	 * Return the footprint of the multiblock as a pair of BlockPos
+	 * @return an array containing 2 BlockPos
+	 */
+	public BlockPos[] getFootprint() {
+		BlockPos[] footprint = new BlockPos[2];
+		BlockPos nullCenter = new BlockPos(0, 0, 0);
+
+		if (center != null) {
+			footprint[0] = center.add(-RADIUS, 0, -RADIUS);
+			footprint[1] = center.add(RADIUS, 0, RADIUS);
+		} else {
+			return null;
+		}
+
+		return footprint;
+	}
+
+	/**
 	 * Return the next BlockPos in the operating area for the Multiblock,
 	 * i.e. the soil to perform an action on.
 	 * @return

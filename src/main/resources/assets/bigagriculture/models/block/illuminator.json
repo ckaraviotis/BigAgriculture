@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "up": "bigagriculture:blocks/default",
+    "down": "bigagriculture:blocks/default",
+    "north": "bigagriculture:blocks/illuminator",
+    "south": "bigagriculture:blocks/illuminator",
+    "east": "bigagriculture:blocks/illuminator",
+    "west": "bigagriculture:blocks/illuminator",
+    "particle": "bigagriculture:blocks/illuminator"
+  }
+}

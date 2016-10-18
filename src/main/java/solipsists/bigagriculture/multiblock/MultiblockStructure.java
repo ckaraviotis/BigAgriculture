@@ -60,6 +60,7 @@ public class MultiblockStructure {
 		return false;
 	}
 
+
 	/**
 	 * The number of blocks in the structure
      * @return size of the structure

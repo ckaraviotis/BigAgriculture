@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "up": "bigagriculture:blocks/glowing_air",
+    "down": "bigagriculture:blocks/glowing_air",
+    "north": "bigagriculture:blocks/glowing_air",
+    "south": "bigagriculture:blocks/glowing_air",
+    "east": "bigagriculture:blocks/glowing_air",
+    "west": "bigagriculture:blocks/glowing_air",
+    "particle": "bigagriculture:blocks/glowing_air"
+  }
+}
