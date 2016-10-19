@@ -139,7 +139,8 @@ public class TileController extends TileMultiblock implements ITickable, ICapabi
 	
 	private boolean till(BlockPos pos) {
 		// Irrigation and tilling happens on the block BELOW current
-		pos = pos.add(0,-1,0);
+        pos = pos.add(0, -1, 0);
+
 		IBlockState state = worldObj.getBlockState(pos);
 		Block b = state.getBlock();
 		boolean isFarmland = b instanceof BlockFarmland;

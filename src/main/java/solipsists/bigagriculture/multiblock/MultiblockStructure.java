@@ -41,6 +41,27 @@ public class MultiblockStructure {
         double z = (boundsMin.getZ() + boundsMax.getZ()) / 2;
         double y = boundsMin.getY();
 
+
+        // If we have ground blocks, use them for our Y value
+        if (getBlocksOfType(Multiblock.TYPE.GROUND_LEVEL) > 0) {
+            boolean groundLevelInit = false;
+            HashSet<BlockPos> groundLevelPos = getPosOfType(Multiblock.TYPE.GROUND_LEVEL);
+
+            for (BlockPos p : groundLevelPos) {
+                if (!groundLevelInit) {
+                    y = p.getY();
+                    groundLevelInit = true;
+                }
+
+                if (p.getY() > y) {
+                    y = p.getY();
+                }
+            }
+
+            // Increase Y level to account for ground being *equal* level to the indicator block
+            y += 2;
+        }
+
         BlockPos center = new BlockPos(x, y, z);
         return center;
     }
@@ -280,6 +301,26 @@ public class MultiblockStructure {
             }
 		}
         return blocksOfType;
+    }
+
+    /**
+     * Get all of the BlockPos of a specific type
+     *
+     * @param type The type of block to look for
+     * @return a HashSet containing the BlockPos of the typed block
+     */
+    public HashSet<BlockPos> getPosOfType(Multiblock.TYPE type) {
+        HashSet<BlockPos> blockpos = new HashSet<BlockPos>();
+
+        for (HashMap.Entry<String, MultiblockEntry> pair : structure.entrySet()) {
+            MultiblockEntry entry = pair.getValue();
+
+            if (entry.type == type) {
+                blockpos.add(entry.pos);
+            }
+        }
+
+        return blockpos;
     }
 
 }

@@ -17,6 +17,7 @@ public class ModBlocks {
 	public static BlockCapacitor capacitor;
     public static BlockGlowingAir glowing_air;
     public static BlockIlluminator illuminator;
+    public static BlockGroundLevel ground_level;
 
     public static void init() {
 		controller = new BlockController();	
@@ -30,6 +31,7 @@ public class ModBlocks {
 		capacitor = new BlockCapacitor();
         glowing_air = new BlockGlowingAir();
         illuminator = new BlockIlluminator();
+        ground_level = new BlockGroundLevel();
     }
 	
 	@SideOnly(Side.CLIENT)
@@ -45,6 +47,7 @@ public class ModBlocks {
 		capacitor.initModel();
         glowing_air.initModel();
         illuminator.initModel();
+        ground_level.initModel();
     }
 	
 	@SideOnly(Side.CLIENT)

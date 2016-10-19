@@ -215,7 +215,8 @@ public class Multiblock {
         INFINITY_STONE,
         IRRIGATOR,
         VOID_STONE,
-        ILLUMINATOR
+        ILLUMINATOR,
+        GROUND_LEVEL
     }
 
 }
